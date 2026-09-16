@@ -754,7 +754,12 @@ table.info td b{font-weight:700}
   }
 
   /* 전체 질문 대본 토글 */
-  var scriptsVisible=true;
+  var scriptsVisible=false;
+  (function(){
+    document.querySelectorAll(".qscript").forEach(function(el){el.hidden=true;});
+    var btn=document.getElementById("scriptToggleBtn");
+    if(btn)btn.textContent="질문 대본 보기";
+  })();
   window.toggleAllScripts=function(){
     scriptsVisible=!scriptsVisible;
     document.querySelectorAll(".qscript").forEach(function(el){
