@@ -44,13 +44,15 @@ h1,h2,h3{font-family:"Noto Serif KR","Noto Sans KR",serif;font-weight:700;letter
   background:var(--panel);border-bottom:1px solid var(--rule-strong);
   padding:8px 22px;display:flex;align-items:center;gap:10px;
 }
-.topbar-save,.topbar-load,.topbar-reset{
+.topbar-save,.topbar-load,.topbar-reset,.topbar-script{
   font:inherit;font-size:.8rem;padding:5px 13px;border-radius:2px;cursor:pointer;
   border:1px solid var(--rule-strong);background:none;color:var(--ink);transition:border-color .1s;
 }
 .topbar-save{background:var(--ink);color:var(--paper);border-color:var(--ink);}
 .topbar-save:hover{opacity:.85}
 .topbar-load:hover,.topbar-reset:hover{border-color:var(--ink)}
+.topbar-script{border-color:var(--script-border);color:var(--script);background:var(--script-bg);}
+.topbar-script:hover{border-color:var(--script);opacity:.85}
 .topbar-title{font-size:.85rem;color:var(--ink-soft);margin-left:auto}
 
 /* masthead */
@@ -108,13 +110,9 @@ table.info td b{font-weight:700}
   background:var(--script-bg);border:1px solid var(--script-border);border-radius:2px;
   font-size:.88rem;color:var(--script);line-height:1.8;
 }
-.qscript-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.qscript-lbl{font-size:.75rem;font-weight:700;color:var(--script);letter-spacing:.03em}
-.qscript-tog{
-  font:inherit;font-size:.75rem;color:var(--script);background:none;
-  border:1px solid var(--script-border);border-radius:2px;padding:1px 8px;cursor:pointer;
-}
-.qscript-tog:hover{background:var(--script-border)}
+.qscript[hidden]{display:none}
+.qscript-body[contenteditable]{outline:none;cursor:text}
+.qscript-body[contenteditable]:focus{outline:1px dashed var(--script-border);outline-offset:3px;border-radius:2px}
 .qscript-body .main-q{display:block;font-weight:600;margin-bottom:8px}
 .qscript-body .fups{margin-top:8px;padding-top:8px;border-top:1px dashed var(--script-border)}
 .qscript-body .fups-lbl{font-size:.75rem;font-weight:700;display:block;margin-bottom:5px}
@@ -132,7 +130,8 @@ table.info td b{font-weight:700}
 .qnote-lbl{font-size:.75rem;color:var(--ink-soft);margin-top:8px;display:block}
 
 /* scale */
-.scale{display:flex;flex-wrap:wrap;gap:6px;padding:11px 16px 14px;border-top:1px dashed var(--rule)}
+.scale-lbl{padding:9px 16px 4px;border-top:1px dashed var(--rule);font-size:.72rem;font-weight:700;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
+.scale{display:flex;flex-wrap:wrap;gap:6px;padding:6px 16px 14px}
 .scale button{
   flex:1 1 84px;min-width:78px;padding:8px 4px;cursor:pointer;
   font-family:inherit;font-size:.8rem;color:var(--ink-soft);
@@ -199,9 +198,9 @@ table.info td b{font-weight:700}
 }
 @media print{
   .verdict,.topbar{position:static}
-  .reset,.topbar-save,.topbar-load,.topbar-reset,.qscript-tog{display:none}
+  .reset,.topbar-save,.topbar-load,.topbar-reset,.topbar-script{display:none}
   body{background:#fff}
-  .qscript-body{display:block!important}
+  .qscript{display:none}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -213,6 +212,7 @@ table.info td b{font-weight:700}
   <button class="topbar-save" onclick="saveAll()">저장</button>
   <button class="topbar-load" onclick="loadAll()">불러오기</button>
   <button class="topbar-reset" onclick="hardReset()">초기화</button>
+  <button id="scriptToggleBtn" class="topbar-script" onclick="toggleAllScripts()">질문 대본 숨기기</button>
   <span class="topbar-title">재무팀 차장 채용 면담 기록부 — 김남경</span>
 </div>
 
@@ -283,11 +283,7 @@ table.info td b{font-weight:700}
         <p class="q">비투엔의 직권 지정 <b>사유</b>가 무엇이었습니까?
           <span class="listen">재무기준 미달인지, 감리 결과인지, 연속 영업손실인지를 정확히 짚는지. 못 짚으면 대응 주체가 아니었다는 뜻입니다.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_1">
             <span class="main-q">"비투엔이 금감원 직권 지정감사를 받게 된 배경이 어떻게 되었나요? 어떤 사유로 지정이 됐는지 정확히 말씀해 주시겠어요?"</span>
             <div class="fups">
               <span class="fups-lbl">답변이 모호할 때</span>
@@ -303,11 +299,7 @@ table.info td b{font-weight:700}
         <p class="q">지정감사인이 직전 감사인보다 추가로 요구한 자료와 쟁점은 무엇이었고, 의견은 어떻게 나왔습니까?
           <span class="listen">범위제한·강조사항 여부까지 기억하는지.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_2">
             <span class="main-q">"지정감사인이 기존 감사인과 비교해서 어떤 부분을 더 깊이 들여다봤나요? 추가로 요구한 자료나 특별히 문제를 제기한 쟁점이 있었나요? 최종 감사의견은 어떻게 나왔나요?"</span>
             <div class="fups">
               <span class="fups-lbl">추가 질문</span>
@@ -324,11 +316,7 @@ table.info td b{font-weight:700}
         <p class="q">감사인과 회계처리 <b>이견</b>이 있었던 사안 한 건을 구체적으로 말씀해 주십시오. 결론은 어느 쪽으로 났고, 어떤 근거자료를 만드셨습니까?
           <span class="listen">이견 사례를 하나도 못 꺼내면 시키는 대로 따라간 포지션입니다.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_3">
             <span class="main-q">"감사인과 회계처리 방향이 달라서 의견이 충돌했던 사안이 한 건이라도 있었나요? 어떤 항목이었고, 본인은 어떤 근거로 회사 입장을 주장하셨나요? 결국 어떻게 결론이 났나요?"</span>
             <div class="fups">
               <span class="fups-lbl">이견 사례를 못 꺼낼 때</span>
@@ -340,6 +328,7 @@ table.info td b{font-weight:700}
         <textarea class="qnote" data-note="n_a1_3" placeholder="이견 사례 구체성 기록. 못 꺼내면 명시."></textarea>
       </div>
     </div>
+    <div class="scale-lbl">채점</div>
     <div class="scale"></div>
   </div>
 
@@ -353,11 +342,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">비상장 지분증권을 공정가치로 평가해 보신 적이 있습니까? 평가기법, 외부평가기관 선정 기준, 감사인 설득 과정을 말씀해 주십시오.</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_4">
             <span class="main-q">"비상장 주식이나 지분을 공정가치로 평가해 본 경험이 있으신가요? 있다면 어떤 평가 방법을 쓰셨고, 외부 평가기관을 선정할 때 어떤 기준으로 고르셨나요? 감사인에게 그 평가 결과를 어떻게 설명하고 납득시키셨나요?"</span>
             <div class="fups">
               <span class="fups-lbl">경험이 없다고 할 때</span>
@@ -372,11 +357,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">관계기업 분류를 FVTPL로(또는 반대로) 변경해 본 경험이 있습니까? 유의적 영향력 판단 근거를 어떻게 문서화하셨습니까?</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_5">
             <span class="main-q">"지분법 적용 대상인 관계기업의 분류를 바꿔야 했던 상황이 있으셨나요? 예를 들어 지분율은 20% 이상인데 유의적 영향력이 없다고 판단하거나, 반대의 경우요. 그 판단 근거를 어떻게 문서화하고 감사인을 납득시키셨나요?"</span>
           </div>
         </div>
@@ -388,11 +369,7 @@ table.info td b{font-weight:700}
         <p class="q">손상징후를 <b>본인이 먼저 제기해</b> 손상차손을 인식한 사례가 있습니까?
           <span class="listen">없으면 없다고 말하는지를 보십시오. 여기서 아는 척하는 사람은 우리 회사에서 위험합니다.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_6">
             <span class="main-q">"보유 자산에서 손상징후를 본인이 먼저 발견하고, 경영진이나 감사인보다 먼저 손상차손 인식을 제안한 사례가 있으신가요? 있다면 어떤 자산이었고, 어떤 근거로 제기하셨나요?"</span>
             <div class="fups">
               <span class="fups-lbl">아는 척하는 것 같으면</span>
@@ -404,6 +381,7 @@ table.info td b{font-weight:700}
         <textarea class="qnote" data-note="n_a2_3" placeholder="솔직히 인정했는지 vs 아는 척했는지 기록"></textarea>
       </div>
     </div>
+    <div class="scale-lbl">채점</div>
     <div class="scale"></div>
   </div>
 
@@ -417,11 +395,7 @@ table.info td b{font-weight:700}
         <p class="q">관리종목 지정이나 상장적격성 실질심사를 겪어보셨습니까? 없다면, 개선계획서를 준비한다고 가정할 때 무엇부터 착수하시겠습니까?
           <span class="listen">경험이 없어도 사고의 순서가 잡혀 있으면 가점.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_7">
             <span class="main-q">"관리종목 지정이나 상장적격성 실질심사를 직접 겪어 보신 적 있으신가요? 만약 지금 당장 그 상황에 놓인다면 재무팀 입장에서 무엇부터 챙기시겠어요?"</span>
           </div>
         </div>
@@ -432,11 +406,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">정정공시나 지연공시를 낸 경험이 있습니까? 원인과, 그 뒤에 만든 통제 장치는 무엇이었습니까?</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_8">
             <span class="main-q">"공시를 제때 못 내거나 내고 나서 정정해야 했던 경험이 있으신가요? 어떤 이유로 그렇게 됐고, 그 이후에 같은 일이 반복되지 않도록 어떤 장치를 만드셨나요?"</span>
           </div>
         </div>
@@ -448,11 +418,7 @@ table.info td b{font-weight:700}
         <p class="q">SM에서 대규모 내부거래 공시를 하셨는데, 대상 여부 판단이 애매했던 거래를 어떻게 결론 내리셨습니까?
           <span class="listen">판단 주체였는지, 양식만 채웠는지 갈립니다.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_9">
             <span class="main-q">"SM그룹에서 대규모 내부거래 공시를 담당하셨을 때, 이 거래가 공시 대상인지 아닌지 판단하기 어려웠던 사례가 있었나요? 그때 어떻게 판단하셨고, 법무팀이나 외부 자문을 받으셨나요?"</span>
             <div class="fups">
               <span class="fups-lbl">판단 주체인지 확인할 때</span>
@@ -464,6 +430,7 @@ table.info td b{font-weight:700}
         <textarea class="qnote" data-note="n_a3_3" placeholder="판단 주체였는지 vs 양식만 채웠는지 기록"></textarea>
       </div>
     </div>
+    <div class="scale-lbl">채점</div>
     <div class="scale"></div>
   </div>
 
@@ -476,11 +443,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">자금이 빡빡한 국면에서 지급 우선순위를 정해본 경험이 있습니까? 무엇을 먼저 미루셨습니까?</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_10">
             <span class="main-q">"월말 자금이 부족해서 모든 지급 건을 처리하지 못했던 상황이 있으셨나요? 그때 어떤 기준으로 지급 순서를 정하셨나요? 무엇을 먼저 미뤘고, 경영진에게는 어떻게 보고하셨나요?"</span>
           </div>
         </div>
@@ -491,11 +454,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">CB 발행 이후 <b>전환가액 조정</b>이나 조기상환청구 대응을 직접 해보셨습니까? 파생상품부채 평가는 누가 했습니까?</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_11">
             <span class="main-q">"CB(전환사채)를 발행하거나 관리해 보신 경험이 있으신가요? 발행 이후 리픽싱(전환가액 조정)이나 조기상환청구 대응을 직접 처리해 보셨나요? CB에서 파생되는 파생상품부채 평가는 직접 하셨나요, 아니면 외부 평가기관에 맡기셨나요?"</span>
           </div>
         </div>
@@ -506,11 +465,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">소송이나 압류가 걸린 자산의 회계처리와 공시를 다뤄보신 적이 있습니까?</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_12">
             <span class="main-q">"회사 자산이나 채권에 가압류, 압류, 또는 소송이 걸렸던 상황을 회계나 공시로 처리해 본 적 있으신가요? 충당부채 설정 기준을 어떻게 판단하셨나요?"</span>
           </div>
         </div>
@@ -518,6 +473,7 @@ table.info td b{font-weight:700}
         <textarea class="qnote" data-note="n_a4_3" placeholder="답변 내용 기록"></textarea>
       </div>
     </div>
+    <div class="scale-lbl">채점</div>
     <div class="scale"></div>
   </div>
 
@@ -536,11 +492,7 @@ table.info td b{font-weight:700}
         <p class="q">퇴직희망사유에 <b>"보다 안정적인 환경에서 성장하고 싶다"</b>고 쓰셨습니다. 저희 회사 상황은 정확히 그 반대입니다. 알고 지원하신 겁니까? 무엇을 보고 오셨습니까?
           <span class="listen">오늘 면담에서 가장 중요한 질문입니다.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_13">
             <span class="main-q">"이력서에 '보다 안정적인 환경에서 재무 리더로 성장하고 싶다'고 쓰셨는데, 솔직히 말씀드리면 저희 회사는 지금 그 반대에 가까운 상황입니다. 그걸 알고 지원하신 건가요? 저희 회사에 대해 어디서, 어떻게 알아보셨나요?"</span>
             <div class="fups">
               <span class="fups-lbl">대답이 모호하거나 포장되면</span>
@@ -555,11 +507,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">입사 후 6개월 동안 상황이 더 나빠질 수도 있습니다. 그래도 남아 계실 이유는 무엇입니까?</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_14">
             <span class="main-q">"솔직하게 말씀드리면, 입사 후 6개월 동안 상황이 지금보다 나빠질 가능성도 있습니다. 그 상황에서도 계속 일하실 수 있을 이유가 있으신가요? 어떤 기준에서 '이건 나가야겠다'고 판단하시나요?"</span>
           </div>
         </div>
@@ -570,11 +518,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">팀장이 아닌 팀원으로 일하는 기간을 어떻게 받아들이십니까? 현 팀장과 의견이 갈리면 어떻게 하시겠습니까?</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_15">
             <span class="main-q">"입사하시면 당분간 현 팀장 아래에서 팀원으로 일하시게 됩니다. 지금 팀장 직책을 갖고 계신 분이 팀원 포지션으로 오시는 건데, 그 기간을 심리적으로 어떻게 받아들이실 것 같으세요? 실무 판단에서 현 팀장과 의견이 다를 때는 어떻게 하시겠어요?"</span>
             <div class="fups">
               <span class="fups-lbl">너무 쉽게 "괜찮다"고 하면</span>
@@ -586,6 +530,7 @@ table.info td b{font-weight:700}
         <textarea class="qnote" data-note="n_a5_3" placeholder="팀원 수용도, 팀장 의견 충돌 시 대응 방식 기록"></textarea>
       </div>
     </div>
+    <div class="scale-lbl">채점</div>
     <div class="scale"></div>
   </div>
 
@@ -603,11 +548,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">경영진이나 대주주가 회계적으로 무리한 처리를 요구한 적이 있습니까? 어떻게 대응하셨습니까?</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_16">
             <span class="main-q">"경영진이나 오너 측에서 회계 원칙상 무리하다고 판단되는 처리를 요구받은 적이 있으신가요? 어떤 상황이었고, 어떻게 대응하셨나요? 결국 어떻게 됐나요?"</span>
             <div class="fups">
               <span class="fups-lbl">"그런 적 없다"고 하면</span>
@@ -622,11 +563,7 @@ table.info td b{font-weight:700}
       <div class="qblock">
         <p class="q">CFO를 거치지 않고 감사인이나 감사위원회에 <b>직접 보고</b>해야 한다고 판단할 사안의 기준은 무엇입니까?</p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_17">
             <span class="main-q">"재무담당자 입장에서, 일반적인 보고 라인(CFO → 감사인)을 건너뛰고 직접 감사인이나 감사위원회에 보고해야 한다고 판단할 기준은 무엇이라고 생각하세요? 그 선을 넘어야 하는 상황이 어떤 경우인지 본인의 생각을 말씀해 주세요."</span>
           </div>
         </div>
@@ -634,6 +571,7 @@ table.info td b{font-weight:700}
         <textarea class="qnote" data-note="n_a6_2" placeholder="독립성 감각, 내부 고발 기준 명확성 기록"></textarea>
       </div>
     </div>
+    <div class="scale-lbl">채점</div>
     <div class="scale"></div>
   </div>
 
@@ -647,11 +585,7 @@ table.info td b{font-weight:700}
         <p class="q">2023년 11월부터 2024년 1월까지 <b>2개월 공백</b>은 어떤 기간이었습니까?
           <span class="listen">자기소개서에 앞의 두 공백만 설명되어 있고 이 건은 빠져 있습니다.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_18">
             <span class="main-q">"이력서를 보면 삼라마이다스를 2023년 11월에 퇴사하시고, 비투엔은 2024년 1월에 입사하셨는데, 그 2개월은 어떻게 지내셨나요? 자기소개서에는 이 기간에 대한 설명이 없어서요."</span>
           </div>
         </div>
@@ -660,33 +594,26 @@ table.info td b{font-weight:700}
       </div>
 
       <div class="qblock">
-        <p class="q">원앤원에서 7년 9개월 동안 <b>과장 직급을 유지</b>하셨습니다. 승진이 늦어진 이유가 무엇입니까?</p>
+        <p class="q">원앤원 7년 9개월 중 본인이 주도적으로 만들어낸 성과 한 가지를 말씀해 주십시오.
+          <span class="listen">기간이 길수록 "지키는 역할"에 머물렀는지, "만드는 역할"을 했는지 갈립니다. 무엇을 구체적으로 바꿨는지가 기준입니다.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
-            <span class="main-q">"원앤원에서 거의 8년을 계셨는데, 이력서를 보면 입사부터 퇴사까지 쭉 과장이셨어요. 7~8년 동안 직급 변화가 없으셨던 이유가 있나요?"</span>
+          <div class="qscript-body" contenteditable="true" data-script="sc_19">
+            <span class="main-q">"원앤원에서 7년 9개월을 근무하셨는데, 그 기간 중에 본인이 직접 주도해서 만들어 낸 성과가 있다면 한 가지만 말씀해 주시겠어요? 업무 프로세스를 바꿨거나, 기존에 없던 무언가를 새로 구축했거나, 회사에 실질적인 변화를 가져온 사례면 더 좋습니다."</span>
             <div class="fups">
-              <span class="fups-lbl">회사 구조 탓으로만 돌리면</span>
-              <div class="fq">"회사 내에서 본인의 성과 평가는 어땠나요? 5년 장기근속상을 받으셨던 만큼 평가 자체가 나쁘지는 않았을 것 같은데요."</div>
+              <span class="fups-lbl">추상적인 답변이 나올 때</span>
+              <div class="fq">"그 결과가 숫자나 구체적인 변화로 표현된다면 어떻게 되나요? 그 전과 후를 비교해 주실 수 있나요?"</div>
             </div>
           </div>
         </div>
         <span class="qnote-lbl">메모</span>
-        <textarea class="qnote" data-note="n_a7_2" placeholder="설명의 설득력, 방어적 태도 여부 기록"></textarea>
+        <textarea class="qnote" data-note="n_a7_2" placeholder="주도적 성과 구체성 기록. '지키는 역할' vs '만드는 역할' 판단."></textarea>
       </div>
 
       <div class="qblock">
         <p class="q">비투엔 재무팀 인원은 몇 명이고, 직접 마감하신 영역과 위임하신 영역은 어떻게 나뉘었습니까?
           <span class="listen">매출 250억·79명 규모의 "총괄"과 우리 회사의 업무 범위 차이를 본인이 인지하는지.</span></p>
         <div class="qscript">
-          <div class="qscript-hd">
-            <span class="qscript-lbl">🗣 질문 대본</span>
-            <button class="qscript-tog" onclick="toggleScript(this)">접기</button>
-          </div>
-          <div class="qscript-body">
+          <div class="qscript-body" contenteditable="true" data-script="sc_20">
             <span class="main-q">"비투엔 재무팀이 몇 명으로 구성되어 있고, 본인이 직접 처리하는 업무와 팀원에게 맡기는 업무는 어떻게 나뉘어 있나요? 결산이나 감사 대응에서 본인이 직접 손대는 부분과 위임하는 부분을 구체적으로 말씀해 주시겠어요?"</span>
           </div>
         </div>
@@ -694,6 +621,7 @@ table.info td b{font-weight:700}
         <textarea class="qnote" data-note="n_a7_3" placeholder="팀 규모, 직접 처리 범위, 본인 실무 역량 수준 기록"></textarea>
       </div>
     </div>
+    <div class="scale-lbl">채점</div>
     <div class="scale"></div>
   </div>
 
@@ -764,7 +692,7 @@ table.info td b{font-weight:700}
     {label:"우수",w:1}
   ];
   var KEY="vdt_interview_kim_v2";
-  var state={scores:{},flags:{},notes:{},memo:"",iDate:"",iName:""};
+  var state={scores:{},flags:{},notes:{},scripts:{},memo:"",iDate:"",iName:""};
 
   /* 불러오기 */
   function loadState(){
@@ -775,6 +703,7 @@ table.info td b{font-weight:700}
     state.scores=state.scores||{};
     state.flags=state.flags||{};
     state.notes=state.notes||{};
+    state.scripts=state.scripts||{};
   }
 
   function save(){
@@ -788,11 +717,15 @@ table.info td b{font-weight:700}
     setTimeout(function(){t.classList.remove("show");},2000);
   }
 
-  /* 스크립트 토글 */
-  window.toggleScript=function(btn){
-    var body=btn.closest(".qscript").querySelector(".qscript-body");
-    if(body.style.display==="none"){body.style.display="block";btn.textContent="접기";}
-    else{body.style.display="none";btn.textContent="펼치기";}
+  /* 전체 질문 대본 토글 */
+  var scriptsVisible=true;
+  window.toggleAllScripts=function(){
+    scriptsVisible=!scriptsVisible;
+    document.querySelectorAll(".qscript").forEach(function(el){
+      el.hidden=!scriptsVisible;
+    });
+    var btn=document.getElementById("scriptToggleBtn");
+    if(btn)btn.textContent=scriptsVisible?"질문 대본 숨기기":"질문 대본 보기";
   };
 
   /* 전역 저장/불러오기/초기화 */
@@ -804,7 +737,7 @@ table.info td b{font-weight:700}
   };
   window.hardReset=function(){
     if(!confirm("채점, 메모, 체크리스트를 모두 지울까요?"))return;
-    state={scores:{},flags:{},notes:{},memo:"",iDate:"",iName:""};
+    state={scores:{},flags:{},notes:{},scripts:{},memo:"",iDate:"",iName:""};
     save(); applyAll(); update();
     toast("초기화 완료.");
   };
@@ -825,6 +758,11 @@ table.info td b{font-weight:700}
     document.querySelectorAll(".qnote").forEach(function(el){
       var k=el.getAttribute("data-note");
       if(k)el.value=state.notes[k]||"";
+    });
+    /* 대본 */
+    document.querySelectorAll(".qscript-body[data-script]").forEach(function(el){
+      var k=el.getAttribute("data-script");
+      if(state.scripts[k])el.innerHTML=state.scripts[k];
     });
     /* 메인 메모 */
     var mm=document.getElementById("mainMemo");
@@ -885,6 +823,13 @@ table.info td b{font-weight:700}
       el.value=state.notes[k]||"";
       el.addEventListener("input",function(){state.notes[k]=el.value;save();});
     }
+  });
+
+  /* 질문 대본 편집 저장 */
+  document.querySelectorAll(".qscript-body[data-script]").forEach(function(el){
+    var k=el.getAttribute("data-script");
+    if(state.scripts[k])el.innerHTML=state.scripts[k];
+    el.addEventListener("input",function(){state.scripts[k]=el.innerHTML;save();});
   });
 
   /* 메인 메모 */
