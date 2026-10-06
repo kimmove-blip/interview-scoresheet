@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>면접 채점표 — 홍원의</title>
+<style>
+  :root {
+    --primary: #0f766e;
+    --primary-light: #14b8a6;
+    --accent: #06b6d4;
+    --bg: #f0faf9;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --success: #16a34a;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --score-1: #fee2e2;
+    --score-2: #fed7aa;
+    --score-3: #fef9c3;
+    --score-4: #dcfce7;
+    --score-5: #ccfbf1;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  .nav-bar {
+    background: #0f172a;
+    padding: 10px 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .nav-label { font-size: 11px; color: #94a3b8; font-weight: 500; margin-right: 4px; }
+  .nav-link {
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    text-decoration: none; transition: all 0.15s;
+    background: rgba(255,255,255,0.08); color: #cbd5e1;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.18); color: white; }
+  .nav-link.active { background: #0f766e; color: white; }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+    color: white;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(15,118,110,0.3);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+  .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .btn-ghost { background: rgba(255,255,255,0.15); color: white; }
+  .btn-ghost:hover { background: rgba(255,255,255,0.25); }
+  .btn-white { background: white; color: var(--primary); }
+  .btn-white:hover { background: #ccfbf1; }
+  .btn-pdf { background: #dc2626; color: white; }
+  .btn-pdf:hover { background: #b91c1c; }
+  .btn-danger { background: rgba(255,255,255,0.1); color: #fca5a5; border: 1px solid rgba(252,165,165,0.4); }
+  .btn-danger:hover { background: rgba(220,38,38,0.3); }
+
+  /* ── CANDIDATE CARD ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+  .candidate-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: center;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, #0d9488, #0891b2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .cand-info h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .cand-meta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  }
+  .tag-teal { background: #ccfbf1; color: #0f766e; }
+  .tag-blue { background: #dbeafe; color: #1d4ed8; }
+  .tag-green { background: #dcfce7; color: #15803d; }
+  .tag-purple { background: #f3e8ff; color: #7e22ce; }
+  .tag-orange { background: #ffedd5; color: #c2410c; }
+  .tag-red { background: #fee2e2; color: #b91c1c; }
+  .score-summary {
+    text-align: center; min-width: 100px;
+    background: linear-gradient(135deg, #0f766e, #0d9488);
+    border-radius: 10px; padding: 14px 18px; color: white;
+  }
+  .score-summary .total-score { font-size: 36px; font-weight: 800; line-height: 1; }
+  .score-summary .total-max { font-size: 14px; opacity: 0.75; }
+  .score-summary .score-label { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+
+  /* ── CAREER TIMELINE ── */
+  .career-mini { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .career-item {
+    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    background: #f1f5f9; color: var(--muted); border: 1px solid var(--border);
+  }
+  .career-item strong { color: var(--text); }
+  .career-item.warn { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+  .career-item.highlight { background: #ccfbf1; border-color: #99f6e4; color: #0f766e; }
+
+  /* ── META ROW ── */
+  .meta-row {
+    background: var(--card); border-radius: var(--radius);
+    padding: 16px 24px; margin-bottom: 24px;
+    display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .meta-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .meta-item label { color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .meta-item input, .meta-item select {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; font-size: 14px; color: var(--text);
+    background: white; outline: none;
+  }
+  .meta-item input:focus, .meta-item select:focus { border-color: var(--primary-light); }
+
+  /* ── SECTION ── */
+  .section {
+    background: var(--card); border-radius: var(--radius);
+    padding: 24px 28px; margin-bottom: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 16px; font-weight: 700; color: var(--text);
+  }
+  .section-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .section-score-badge {
+    font-size: 13px; font-weight: 600; color: var(--primary);
+    background: #ccfbf1; padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* ── QUESTION ITEM ── */
+  .q-item { margin-bottom: 24px; }
+  .q-item:last-child { margin-bottom: 0; }
+  .q-label { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text); line-height: 1.5; }
+  .q-hint {
+    font-size: 12px; color: var(--muted); margin-bottom: 10px;
+    background: #f8fafc; border-left: 3px solid var(--accent);
+    padding: 6px 10px; border-radius: 0 6px 6px 0; line-height: 1.5;
+  }
+  .q-hint.warn-hint { background: #fff7ed; border-left-color: #f97316; color: #92400e; }
+  .score-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .score-btn {
+    flex: 1; min-width: 52px; padding: 10px 8px;
+    border: 2px solid var(--border); border-radius: 8px;
+    background: white; cursor: pointer; text-align: center;
+    transition: all 0.15s; font-size: 13px; font-weight: 600;
+    color: var(--muted); position: relative;
+  }
+  .score-btn:hover { border-color: var(--primary-light); color: var(--primary); transform: translateY(-1px); }
+  .score-btn .num { display: block; font-size: 18px; font-weight: 800; }
+  .score-btn .lbl { display: block; font-size: 10px; margin-top: 1px; }
+  .score-btn.selected-1 { border-color: #ef4444; background: var(--score-1); color: #b91c1c; }
+  .score-btn.selected-2 { border-color: #f97316; background: var(--score-2); color: #c2410c; }
+  .score-btn.selected-3 { border-color: #eab308; background: var(--score-3); color: #a16207; }
+  .score-btn.selected-4 { border-color: #22c55e; background: var(--score-4); color: #15803d; }
+  .score-btn.selected-5 { border-color: #0d9488; background: var(--score-5); color: #0f766e; }
+  textarea.q-note {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; color: var(--text);
+    resize: vertical; min-height: 64px; font-family: inherit;
+    outline: none; transition: border 0.15s; background: #fafafa;
+  }
+  textarea.q-note:focus { border-color: var(--primary-light); background: white; }
+  textarea.q-note::placeholder { color: #94a3b8; }
+
+  /* ── OVERALL EVAL ── */
+  .eval-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .eval-grid { grid-template-columns: 1fr; } }
+  .eval-field label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+  .eval-field textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; font-family: inherit;
+    resize: vertical; min-height: 80px; outline: none;
+    transition: border 0.15s; background: #fafafa;
+  }
+  .eval-field textarea:focus { border-color: var(--primary-light); background: white; }
+  .result-select-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .result-btn {
+    flex: 1; min-width: 120px; padding: 14px;
+    border: 2px solid var(--border); border-radius: 10px;
+    background: white; cursor: pointer; text-align: center;
+    font-size: 14px; font-weight: 700; transition: all 0.15s;
+  }
+  .result-btn:hover { transform: translateY(-2px); }
+  .result-btn.pass { border-color: #22c55e; background: #dcfce7; color: #15803d; }
+  .result-btn.hold { border-color: #eab308; background: #fef9c3; color: #a16207; }
+  .result-btn.fail { border-color: #ef4444; background: #fee2e2; color: #b91c1c; }
+  .result-btn.active-pass { border-color: #16a34a; background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22,163,74,0.4); }
+  .result-btn.active-hold { border-color: #ca8a04; background: #ca8a04; color: white; box-shadow: 0 4px 12px rgba(202,138,4,0.4); }
+  .result-btn.active-fail { border-color: #dc2626; background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220,38,38,0.4); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: #1e293b; color: white; padding: 12px 20px;
+    border-radius: 10px; font-size: 14px; font-weight: 500;
+    opacity: 0; transform: translateY(10px); transition: all 0.3s;
+    z-index: 9999; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media print {
+    body { background: white; }
+    .nav-bar, .header-actions, .btn { display: none !important; }
+    .section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+    textarea { border: 1px solid #ccc !important; background: white !important; }
+  }
+
+  .q-divider { border: none; border-top: 1px dashed var(--border); margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- 후보자 탐색 네비게이션 -->
+<div class="nav-bar">
+  <span class="nav-label">후보자</span>
+  <a href="index.html" class="nav-link">김남경</a>
+  <a href="김영우.html" class="nav-link">김영우</a>
+  <a href="홍원의.html" class="nav-link active">홍원의</a>
+</div>
+
+<div class="header">
+  <div>
+    <h1>면접 채점표</h1>
+    <div class="subtitle">재무회계 직군 · 인터뷰 평가 기록 시스템</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="loadData()">💾 불러오기</button>
+    <button class="btn btn-ghost" onclick="saveData()">✅ 저장</button>
+    <button class="btn btn-white" onclick="window.print()">🖨️ 인쇄</button>
+    <button class="btn btn-danger" onclick="resetAll()">초기화</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 지원자 정보 -->
+  <div class="candidate-card">
+    <div class="avatar">홍</div>
+    <div class="cand-info">
+      <h2>홍원의</h2>
+      <div class="cand-meta">
+        <span class="tag tag-teal">재무회계 · 경력 14년 8개월</span>
+        <span class="tag tag-blue">현) 엑시큐어하이트론[코스피] 부장</span>
+        <span class="tag tag-purple">K-IFRS 복잡이슈 전문</span>
+        <span class="tag tag-green">외부지정감사 8회 · 기업회생 경험</span>
+        <span class="tag tag-orange">최종연봉 8,800만원</span>
+      </div>
+      <div class="career-mini">
+        <div class="career-item highlight"><strong>엑시큐어하이트론[코스피]</strong> 부장 2025.12~현재</div>
+        <div class="career-item warn"><strong>CSA코스믹[코스닥]</strong> 부장 2025.09~2025.11 (3개월)</div>
+        <div class="career-item highlight"><strong>무궁화인포메이션테크놀로지[코스닥]</strong> 부장 2021.12~2025.09 (3년10개월)</div>
+        <div class="career-item"><strong>에이티세미콘[코스닥]</strong> 과장 2020.11~2021.12</div>
+        <div class="career-item"><strong>에스마크[코스닥]</strong> 과장 2018.02~2020.08</div>
+        <div class="career-item warn"><strong>만보사</strong> 과장(팀장) 2017.02~2017.12 (11개월)</div>
+        <div class="career-item warn"><strong>더메이·우평건설</strong> 대리 2014~2017</div>
+        <div class="career-item"><strong>동하코퍼레이션</strong> 주임 2011~2014</div>
+      </div>
+    </div>
+    <div class="score-summary">
+      <div class="total-score" id="totalScore">0</div>
+      <div class="total-max">/ <span id="totalMax">0</span>점</div>
+      <div class="score-label">총점</div>
+    </div>
+  </div>
+
+  <!-- 면접 기본 정보 -->
+  <div class="meta-row">
+    <div class="meta-item">
+      <label>면접일시</label>
+      <input type="datetime-local" id="interviewDate">
+    </div>
+    <div class="meta-item">
+      <label>면접관</label>
+      <input type="text" id="interviewer" placeholder="이름" style="width:100px">
+    </div>
+    <div class="meta-item">
+      <label>지원 직급</label>
+      <input type="text" id="applyPos" placeholder="예) 팀장 / 부장" style="width:120px">
+    </div>
+    <div class="meta-item">
+      <label>면접 방식</label>
+      <select id="interviewType">
+        <option>대면</option>
+        <option>화상</option>
+        <option>전화</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ① K-IFRS 전문성 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#ccfbf1">📊</div>
+        <span>① K-IFRS 전문성</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 25점)</span>
+      </div>
+      <div class="section-score-badge" id="sec1-badge">0 / 25점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">1-1. 전환사채·파생상품부채 — 상각표 작성 외 공정가치 평가 및 감사인 소명 사례</div>
+      <div class="q-hint">전환사채 상각 및 파생상품부채 공정가치 측정을 여러 회사에서 반복 수행. 평가 시 주요 투입 변수(내재변동성, 할인율 등)를 직접 선정했는지, 외부평가기관을 활용했는지. 감사인과 공정가치 이견이 있었던 구체적 사안.</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_1" placeholder="면접관 메모 — 투입 변수 선정 방법, 외부기관 여부, 감사인 소명 사례"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-2. 연결결산 — 나스닥 상장 해외 자회사 US GAAP → K-IFRS 조정 실무 (엑시큐어하이트론)</div>
+      <div class="q-hint">엑시큐어하이트론에서 나스닥 상장 해외 자회사 연결 패키지 조율. US GAAP과 K-IFRS 차이 중 가장 중요하게 다룬 항목(리스, 수익인식, 주식보상 등). 외화환산 방법(기능통화 결정), 자회사 담당자와의 소통 방식.</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_2" placeholder="면접관 메모 — GAAP 차이 항목, 환산 방법, 협업 방식"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-3. CGU 손상평가 — 평가 주체, 주요 가정 설정, 감사인 설득 사례 (무궁화IT)</div>
+      <div class="q-hint">무궁화IT에서 CGU 평가 수행. 손상징후 판단 기준, 사용가치/처분가치 추정 방법론. 외부평가기관 활용 여부. 감사인과 회수가능액 산정에서 이견이 발생했을 때 어떻게 해결했는지. 기업회생 국면에서의 손상 처리.</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_3" placeholder="면접관 메모 — 평가 방법론, 핵심 가정, 감사인 이견 해결 사례"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-4. 자본거래 — 감자·증자 회계처리 복잡 케이스 (무상감자·유상감자·기업회생 중 자본거래)</div>
+      <div class="q-hint">여러 회사에서 감자·증자 반복 처리. 무상감자(결손보전)와 유상감자(주주 환급) 처리 차이. 기업회생 절차 중 자본 구조 개편 회계처리. 주주 구성 변화에 따른 공시 처리. 가장 복잡했던 자본거래 사례.</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_4')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_4')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_4')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_4')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_4')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_4" placeholder="면접관 메모 — 감자 유형별 처리 방법, 기업회생 중 자본 재편 사례"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-5. 공시(DSD·XBRL) — 직접 처리 범위, 오류 발견·정정 경험</div>
+      <div class="q-hint">여러 회사에서 DSD·XBRL 직접 작성. 공시 오류 발견 시 정정 공시 프로세스. 거래소 문의나 정정 요청 대응 경험. XBRL 태깅 오류로 재제출했던 사례. 사업보고서·반기·분기 공시 중 가장 어려웠던 부분.</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_5')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_5')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_5')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_5')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_5')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_5" placeholder="면접관 메모 — 직접 처리 범위, 정정 경험, 거래소 대응 사례"></textarea>
+    </div>
+  </div>
+
+  <!-- ② 위기 대응 경험 검증 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#fef9c3">🚨</div>
+        <span>② 위기 대응 경험 검증</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 20점)</span>
+      </div>
+      <div class="section-score-badge" id="sec2-badge">0 / 20점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">2-1. 외부지정감사 8회 — 가장 어려웠던 건의 감사 쟁점과 해결 방법 (STAR 구조)</div>
+      <div class="q-hint">8회 지정감사 중 지정 사유가 달랐던 건들. 무궁화IT 4회가 대부분. 가장 치열했던 쟁점 1건을 STAR 구조로 확인. 지정재감사 2개년 경험 — 재감사 사유와 2개년 연속 지정된 배경. 감사의견에 근접했던 최악의 순간.</div>
+      <div class="score-row" data-section="2">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_1" placeholder="면접관 메모 — 지정 사유, 주요 쟁점, 해결 방법, 최종 감사의견"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">2-2. 기업회생 — 무궁화IT 기업회생 진행 중 구체적 회계처리 및 역할</div>
+      <div class="q-hint">무궁화IT 기업회생 신청 시점의 회계처리(채무면제이익, 출자전환, 기존 주주 감자 등). 법원 관리인(DIP) 또는 법정관리인과의 협력 방식. 회생채권 시부인 작업. 기업회생 중 분기결산 및 감사 대응. 본인의 핵심 역할.</div>
+      <div class="score-row" data-section="2">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_2" placeholder="면접관 메모 — 회생 신청 계기, 회계처리 내용, 본인 역할, 종결 결과"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">2-3. 상장적격성 실질심사 — 한국거래소 대응, 이의신청 소명서, 최종 결과</div>
+      <div class="q-hint">엑시큐어하이트론·무궁화IT 양사에서 상장적격성 실질심사 대응. 거래소 요청 자료 작성, 기업심사위원회 제출 개선계획서 내용. 법무법인·감사인·거래소 소통 창구 역할. 최종 결과(상장 유지/폐지). 이의신청 성공 경험이 있는지.</div>
+      <div class="score-row" data-section="2">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_3" placeholder="면접관 메모 — 심사 사유, 소명서 내용, 최종 결과, 본인 기여"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">2-4. CSA코스믹 3개월 단기 이직 — 입사 이유, 3개월 만에 퇴사한 실제 이유</div>
+      <div class="q-hint" style="background:#fff7ed;border-left-color:#f97316;color:#92400e;">⚠️ 필수 확인. 2025.09~2025.11 3개월 재직 후 퇴사. 이직 전 무궁화IT에서 3년10개월 근속 후 CSA코스믹으로 이직한 이유, 그리고 3개월 만에 엑시큐어하이트론으로 재이직한 경위. 사실 관계와 이야기의 일관성 확인 필요.</div>
+      <div class="score-row" data-section="2">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_4')"><span class="num">1</span><span class="lbl">납득 안됨</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_4')"><span class="num">2</span><span class="lbl">다소 의심</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_4')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_4')"><span class="num">4</span><span class="lbl">납득</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_4')"><span class="num">5</span><span class="lbl">충분히 납득</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_4" placeholder="면접관 메모 — CSA 입사 이유, 퇴사 이유, 재이직 경위, 이야기 일관성"></textarea>
+    </div>
+  </div>
+
+  <!-- ③ 리더십·관리 역량 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#f3e8ff">👥</div>
+        <span>③ 리더십·관리 역량</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 15점)</span>
+      </div>
+      <div class="section-score-badge" id="sec3-badge">0 / 15점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">3-1. 팀 관리 — 무궁화IT·엑시큐어에서 팀 규모, 업무 배분, 팀원 교육 방식</div>
+      <div class="q-hint">부장급으로 결산 검토(reviewer) 역할 및 팀원 업무 배분·교육. 실제 팀 인원과 역할 분담 방식. 어려웠던 팀 이슈(팀원 역량 부족, 갈등 등) 해결 사례. 결산 프로세스 표준화 구체적 내용과 효과.</div>
+      <div class="score-row" data-section="3">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q3_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q3_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q3_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q3_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q3_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q3_1" placeholder="면접관 메모 — 팀 인원, 역할 배분, 프로세스 표준화 내용"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">3-2. 외부기관 소통 역량 — 법무법인·감사인·거래소·금융기관 대응 사례</div>
+      <div class="q-hint">상장적격성 심사, 기업회생, 회사채 발행, M&A 실사 등 다양한 국면에서 외부기관 소통 창구 역할. 가장 어려웠던 외부기관 소통 사례와 어떻게 해결했는지. 법무법인과 협업한 구체적 내용.</div>
+      <div class="score-row" data-section="3">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q3_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q3_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q3_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q3_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q3_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q3_2" placeholder="면접관 메모 — 외부기관별 소통 방식, 어려웠던 사례, 해결 과정"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">3-3. 자금 운용·조달 관리 — Cash Flow 관리, 금융기관 대응, 회사채 발행 경험</div>
+      <div class="q-hint">자금 운용 및 조달이 핵심역량으로 기재됨. Cash Flow 작성·관리 방식, 금융기관 신용평가 자료 작성 경험, 회사채 발행 구체적 역할(단순 서류 vs 구조 설계 참여). M&A 실사 대응 — 어떤 입장에서 어떤 자료를 준비했는지.</div>
+      <div class="score-row" data-section="3">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q3_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q3_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q3_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q3_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q3_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q3_3" placeholder="면접관 메모 — Cash Flow 관리 방식, 회사채 발행 역할, M&A 대응 경험"></textarea>
+    </div>
+  </div>
+
+  <!-- ④ 문제해결·위기대응 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#fef9c3">⚡</div>
+        <span>④ 문제해결·위기대응 능력</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 15점)</span>
+      </div>
+      <div class="section-score-badge" id="sec4-badge">0 / 15점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">4-1. 감사인 이견 해결 사례 — 가장 치열했던 회계 쟁점과 최종 결론</div>
+      <div class="q-hint">8회 지정감사 중 감사인과 회계처리 이견이 있었던 구체적 사안. 어떤 근거자료와 논리로 설득했는지, 아니면 감사인 요구를 수용했는지. 이견을 수용했다면 어떤 회계처리로 변경됐는지. 이 사안이 재무제표에 미친 영향.</div>
+      <div class="score-row" data-section="4">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q4_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q4_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q4_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q4_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q4_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q4_1" placeholder="면접관 메모 — 이견 항목, 근거자료, 최종 결론, 재무 영향"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">4-2. 기업회생 중 자금 관리 — 현금 위기 상황에서의 지급 우선순위 결정</div>
+      <div class="q-hint">무궁화IT 기업회생 진행 중 자금 고갈 상황. 지급 우선순위(임금·세금·거래처 등) 결정 기준과 실제 사례. DIP 자금 조달 과정 참여 여부. 자금 부족으로 가장 어려웠던 시점과 어떻게 버텼는지.</div>
+      <div class="score-row" data-section="4">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q4_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q4_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q4_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q4_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q4_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q4_2" placeholder="면접관 메모 — 지급 우선순위 기준, 가장 어려운 순간, 해결 방법"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">4-3. 재무구조 개선 회계처리 — 감자·증자·채무조정 동시 진행 복합 케이스</div>
+      <div class="q-hint">엑시큐어하이트론·무궁화IT에서 재무구조 개선안 검토 및 회계처리. 무상감자→유상증자→전환사채 발행이 동시 진행된 경우의 처리 순서. 가장 복잡했던 복합 자본거래 사례. 외부감사인·법무법인과 사전 협의한 내용.</div>
+      <div class="score-row" data-section="4">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q4_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q4_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q4_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q4_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q4_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q4_3" placeholder="면접관 메모 — 복합 자본거래 처리 순서, 사전 협의 내용, 결과"></textarea>
+    </div>
+  </div>
+
+  <!-- ⑤ 지원동기·조직적합성 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#ffedd5">🎯</div>
+        <span>⑤ 지원동기·조직적합성</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 15점)</span>
+      </div>
+      <div class="section-score-badge" id="sec5-badge">0 / 15점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">5-1. 당사 지원 동기 — 우리 회사/직무에 대한 이해도 및 입사 후 기여 계획</div>
+      <div class="q-hint">사전에 당사에 대해 얼마나 조사했는지. 위기 관리 전문가로서 우리 회사의 어떤 점에 끌렸는지. 자기소개서의 "결산 표준화, 감사 쟁점 사전 식별" 계획이 얼마나 구체적인지. 현재 엑시큐어 재직 중 이직 시점 이유.</div>
+      <div class="score-row" data-section="5">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q5_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q5_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q5_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q5_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q5_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q5_1" placeholder="면접관 메모 — 회사 이해도, 기여 계획 구체성, 이직 시점 이유"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">5-2. 이직 경력 일관성 — 총 9개 회사, CSA코스믹 단기 포함 이직 패턴 설명</div>
+      <div class="q-hint">총 9개 회사 근무. 초기(동하·우평건설·더메이·만보사) 이직 잦음, 에스마크부터 안정화되는 듯하나 CSA 3개월이 예외. 본인 스스로 이 패턴을 어떻게 설명하는지. 부정적 감정 표출 여부 관찰. 향후 3~5년 장기 근속 의지.</div>
+      <div class="score-row" data-section="5">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q5_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q5_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q5_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q5_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q5_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q5_2" placeholder="면접관 메모 — 이직 사유 패턴, 부정 발언 여부, 장기 근속 의지"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">5-3. 재무회계 팀장으로서의 커리어 비전 — CFO 지향 여부, 전문가 포지셔닝</div>
+      <div class="q-hint">위기 관리 전문가로서의 자기 정체성 확인. CFO를 목표로 하는지, 재무회계 팀장 전문가로 남을 것인지. 우리 회사(안정적 환경 vs 위기 국면 가능성)에서의 장기 성장 방향. 자기소개서 "어떤 환경에서도 흔들리지 않는 재무보고 체계" 구체적 의미.</div>
+      <div class="score-row" data-section="5">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q5_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q5_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q5_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q5_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q5_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q5_3" placeholder="면접관 메모 — 커리어 비전 구체성, 우리 회사와의 방향 일치"></textarea>
+    </div>
+  </div>
+
+  <!-- ⑥ 처우협의·인성·태도 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#fee2e2">🤝</div>
+        <span>⑥ 처우협의·인성·태도</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 10점)</span>
+      </div>
+      <div class="section-score-badge" id="sec6-badge">0 / 10점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">6-1. 연봉 협의 — 최종연봉 8,800만원 기준, 당사 제시 조건과의 갭 및 협의 태도</div>
+      <div class="q-hint">최종연봉 8,800만원으로 세 후보 중 최고. 당사 제시 조건과의 갭 크기 및 협의 여지. 입사 가능 시기 "최종 합격 후 1개월"(현재 엑시큐어 재직 중). 연봉 협의 태도가 유연한지, 경직되어 있는지.</div>
+      <div class="score-row" data-section="6">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q6_1')"><span class="num">1</span><span class="lbl">불가</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q6_1')"><span class="num">2</span><span class="lbl">어려움</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q6_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q6_1')"><span class="num">4</span><span class="lbl">원활</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q6_1')"><span class="num">5</span><span class="lbl">매우 원활</span></button>
+      </div>
+      <textarea class="q-note" id="note_q6_1" placeholder="협의 내용 메모 — 제시 연봉, 반응, 입사 가능 시기"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">6-2. 전반적 태도·인상 — 면접 내 커뮤니케이션, 경청, 표현력</div>
+      <div class="q-hint">위기 국면 전문가로서의 침착함과 논리성. 답변의 체계성(STAR 구조 자연스럽게 사용 여부), 자신감, 경청 여부. 복잡한 회계 이슈를 비재무진에게 설명하는 방식.</div>
+      <div class="score-row" data-section="6">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q6_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q6_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q6_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q6_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q6_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q6_2" placeholder="면접관 메모 — 침착함, 논리성, STAR 구조 활용, 설명 방식"></textarea>
+    </div>
+  </div>
+
+  <!-- 종합 평가 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#ccfbf1">📝</div>
+        <span>종합 평가</span>
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600">최종 합격 여부</p>
+    <div class="result-select-row">
+      <button class="result-btn pass" id="btn-pass" onclick="setResult('pass')">✅ 합격 (다음 단계 추천)</button>
+      <button class="result-btn hold" id="btn-hold" onclick="setResult('hold')">⏸ 보류 (추가 검토)</button>
+      <button class="result-btn fail" id="btn-fail" onclick="setResult('fail')">❌ 불합격</button>
+    </div>
+
+    <div class="eval-grid" style="margin-top:16px">
+      <div class="eval-field">
+        <label>강점 / 인상적인 점</label>
+        <textarea id="strength" placeholder="예) K-IFRS 복잡이슈 처리 역량 탁월, 지정감사 8회 위기 대응 경험, 코스피·코스닥 양측 경험..."></textarea>
+      </div>
+      <div class="eval-field">
+        <label>우려사항 / 보완 필요 점</label>
+        <textarea id="weakness" placeholder="예) CSA코스믹 3개월 단기 이직 미해소, 총 9개 회사 잦은 이직, 연봉 갭 8,800만원..."></textarea>
+      </div>
+      <div class="eval-field">
+        <label>추가 확인 사항 (2차 면접 또는 레퍼런스)</label>
+        <textarea id="followup" placeholder="예) 무궁화IT 퇴직 이유 레퍼런스, CSA코스믹 단기 이직 실제 경위, 상장적격성 심사 최종 결과..."></textarea>
+      </div>
+      <div class="eval-field">
+        <label>면접관 종합 소견</label>
+        <textarea id="overall" placeholder="전반적인 평가 의견을 자유롭게 작성해주세요."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const scores = {};
+  const sectionMap = {
+    q1_1:'sec1', q1_2:'sec1', q1_3:'sec1', q1_4:'sec1', q1_5:'sec1',
+    q2_1:'sec2', q2_2:'sec2', q2_3:'sec2', q2_4:'sec2',
+    q3_1:'sec3', q3_2:'sec3', q3_3:'sec3',
+    q4_1:'sec4', q4_2:'sec4', q4_3:'sec4',
+    q5_1:'sec5', q5_2:'sec5', q5_3:'sec5',
+    q6_1:'sec6', q6_2:'sec6',
+  };
+  const sectionMax = { sec1:25, sec2:20, sec3:15, sec4:15, sec5:15, sec6:10 };
+  let currentResult = '';
+
+  function setScore(btn, key) {
+    const val = parseInt(btn.dataset.val);
+    scores[key] = val;
+    const row = btn.parentElement;
+    row.querySelectorAll('.score-btn').forEach(b => { b.className = 'score-btn'; });
+    btn.classList.add('selected-' + val);
+    updateScores();
+  }
+
+  function updateScores() {
+    const secTotals = { sec1:0, sec2:0, sec3:0, sec4:0, sec5:0, sec6:0 };
+    Object.entries(scores).forEach(([k, v]) => {
+      const sec = sectionMap[k];
+      if (sec) secTotals[sec] = (secTotals[sec] || 0) + v;
+    });
+    Object.entries(sectionMax).forEach(([sec, max]) => {
+      const badge = document.getElementById(sec + '-badge');
+      if (badge) badge.textContent = (secTotals[sec] || 0) + ' / ' + max + '점';
+    });
+    const total = Object.values(scores).reduce((a,b)=>a+b, 0);
+    const max = Object.keys(sectionMap).length * 5;
+    document.getElementById('totalScore').textContent = total;
+    document.getElementById('totalMax').textContent = max;
+  }
+
+  function setResult(r) {
+    currentResult = r;
+    ['pass','hold','fail'].forEach(type => {
+      document.getElementById('btn-' + type).className = 'result-btn ' + type;
+    });
+    document.getElementById('btn-' + r).classList.add('active-' + r);
+  }
+
+  function saveData() {
+    const data = {
+      scores: { ...scores },
+      notes: {},
+      meta: {
+        interviewDate: document.getElementById('interviewDate').value,
+        interviewer: document.getElementById('interviewer').value,
+        applyPos: document.getElementById('applyPos').value,
+        interviewType: document.getElementById('interviewType').value,
+      },
+      result: currentResult,
+      eval: {
+        strength: document.getElementById('strength').value,
+        weakness: document.getElementById('weakness').value,
+        followup: document.getElementById('followup').value,
+        overall: document.getElementById('overall').value,
+      }
+    };
+    document.querySelectorAll('.q-note').forEach(el => { data.notes[el.id] = el.value; });
+    localStorage.setItem('interview_hongwu', JSON.stringify(data));
+    showToast('✅ 저장되었습니다.');
+  }
+
+  function loadData() {
+    const raw = localStorage.getItem('interview_hongwu');
+    if (!raw) { showToast('저장된 데이터가 없습니다.'); return; }
+    const data = JSON.parse(raw);
+    Object.entries(data.scores || {}).forEach(([k, v]) => {
+      scores[k] = v;
+      const noteEl = document.getElementById('note_' + k);
+      if (!noteEl) return;
+      const qItem = noteEl.closest('.q-item');
+      if (!qItem) return;
+      const btn = qItem.querySelector(`.score-btn[data-val="${v}"]`);
+      if (btn) {
+        qItem.querySelectorAll('.score-btn').forEach(b => b.className = 'score-btn');
+        btn.classList.add('selected-' + v);
+      }
+    });
+    Object.entries(data.notes || {}).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+    if (data.meta) {
+      Object.entries(data.meta).forEach(([k, v]) => {
+        const el = document.getElementById(k);
+        if (el) el.value = v;
+      });
+    }
+    if (data.result) setResult(data.result);
+    if (data.eval) {
+      Object.entries(data.eval).forEach(([k, v]) => {
+        const el = document.getElementById(k);
+        if (el) el.value = v;
+      });
+    }
+    updateScores();
+    showToast('📂 불러오기 완료!');
+  }
+
+  function resetAll() {
+    if (!confirm('모든 입력 내용을 초기화하시겠습니까?')) return;
+    Object.keys(scores).forEach(k => delete scores[k]);
+    document.querySelectorAll('.score-btn').forEach(b => b.className = 'score-btn');
+    document.querySelectorAll('.q-note, #strength, #weakness, #followup, #overall').forEach(el => el.value = '');
+    ['interviewDate','interviewer','applyPos'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    currentResult = '';
+    ['pass','hold','fail'].forEach(type => {
+      document.getElementById('btn-' + type).className = 'result-btn ' + type;
+    });
+    updateScores();
+    showToast('🔄 초기화 완료');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  setInterval(saveData, 30000);
+  updateScores();
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('interviewDate').value =
+    now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) +
+    'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+</script>
+</body>
+</html>
