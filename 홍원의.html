@@ -252,6 +252,33 @@
   }
 
   .q-divider { border: none; border-top: 1px dashed var(--border); margin: 20px 0; }
+
+  /* ── SPLIT VIEW ── */
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  .split-wrapper { flex: 1; display: flex; min-height: 0; overflow: hidden; }
+  .content-pane { flex: 1; overflow-y: auto; min-width: 0; }
+  .pdf-pane {
+    flex: 0 0 0; overflow: hidden;
+    transition: flex-basis 0.25s ease;
+    display: flex; flex-direction: column; background: #f8fafc;
+  }
+  .pdf-pane.open { flex-basis: 45%; border-left: 2px solid var(--border); }
+  .pdf-toolbar {
+    padding: 10px 16px; background: #0f172a; color: white;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0; gap: 12px;
+  }
+  .pdf-toolbar-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pdf-close-btn {
+    background: rgba(255,255,255,0.12); border: none; color: white;
+    padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .pdf-close-btn:hover { background: rgba(255,255,255,0.25); }
+  #pdfFrame { flex: 1; width: 100%; border: none; }
+  @media print { .pdf-pane { display: none !important; } .content-pane { overflow: visible; } }
 </style>
 </head>
 <body>
@@ -270,6 +297,7 @@
     <div class="subtitle">재무회계 직군 · 인터뷰 평가 기록 시스템</div>
   </div>
   <div class="header-actions">
+    <button class="btn btn-pdf" id="pdfToggleBtn" onclick="togglePdf()">📄 이력서 보기</button>
     <button class="btn btn-ghost" onclick="loadData()">💾 불러오기</button>
     <button class="btn btn-ghost" onclick="saveData()">✅ 저장</button>
     <button class="btn btn-white" onclick="window.print()">🖨️ 인쇄</button>
@@ -277,6 +305,8 @@
   </div>
 </div>
 
+<div class="split-wrapper">
+<div class="content-pane">
 <div class="container">
 
   <!-- 지원자 정보 -->
@@ -730,6 +760,16 @@
   </div>
 
 </div>
+</div><!-- /container -->
+</div><!-- /content-pane -->
+<div class="pdf-pane" id="pdfPane">
+  <div class="pdf-toolbar">
+    <span class="pdf-toolbar-title">📄 이력서 — 홍원의</span>
+    <button class="pdf-close-btn" onclick="togglePdf()">✕ 닫기</button>
+  </div>
+  <iframe id="pdfFrame" src=""></iframe>
+</div>
+</div><!-- /split-wrapper -->
 
 <div class="toast" id="toast"></div>
 
@@ -861,6 +901,21 @@
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function togglePdf() {
+    const pane = document.getElementById('pdfPane');
+    const frame = document.getElementById('pdfFrame');
+    const btn = document.getElementById('pdfToggleBtn');
+    if (pane.classList.contains('open')) {
+      pane.classList.remove('open');
+      frame.src = '';
+      if (btn) btn.textContent = '📄 이력서 보기';
+    } else {
+      pane.classList.add('open');
+      frame.src = '이력서_경력기술서_홍원의.pdf';
+      if (btn) btn.textContent = '✕ 이력서 닫기';
+    }
   }
 
   setInterval(saveData, 30000);
