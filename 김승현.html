@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>면접 채점표 — 김승현</title>
+<style>
+  :root {
+    --primary: #1e40af;
+    --primary-light: #3b82f6;
+    --accent: #0ea5e9;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --success: #16a34a;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --score-1: #fee2e2;
+    --score-2: #fed7aa;
+    --score-3: #fef9c3;
+    --score-4: #dcfce7;
+    --score-5: #dbeafe;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .nav-bar {
+    background: #0f172a;
+    padding: 10px 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .nav-label { font-size: 11px; color: #94a3b8; font-weight: 500; margin-right: 4px; }
+  .nav-link {
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    text-decoration: none; transition: all 0.15s;
+    background: rgba(255,255,255,0.08); color: #cbd5e1;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.18); color: white; }
+  .nav-link.active { background: #1e40af; color: white; }
+
+  .header {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    color: white;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(30,64,175,0.3);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+  .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .btn-ghost { background: rgba(255,255,255,0.15); color: white; }
+  .btn-ghost:hover { background: rgba(255,255,255,0.25); }
+  .btn-white { background: white; color: var(--primary); }
+  .btn-white:hover { background: #e0e7ff; }
+  .btn-pdf { background: #dc2626; color: white; }
+  .btn-pdf:hover { background: #b91c1c; }
+  .btn-danger { background: rgba(255,255,255,0.1); color: #fca5a5; border: 1px solid rgba(252,165,165,0.4); }
+  .btn-danger:hover { background: rgba(220,38,38,0.3); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+  .candidate-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: center;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .cand-info h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .cand-meta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  }
+  .tag-blue { background: #dbeafe; color: #1d4ed8; }
+  .tag-green { background: #dcfce7; color: #15803d; }
+  .tag-purple { background: #f3e8ff; color: #7e22ce; }
+  .tag-orange { background: #ffedd5; color: #c2410c; }
+  .tag-red { background: #fee2e2; color: #b91c1c; }
+  .score-summary {
+    text-align: center; min-width: 100px;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    border-radius: 10px; padding: 14px 18px; color: white;
+  }
+  .score-summary .total-score { font-size: 36px; font-weight: 800; line-height: 1; }
+  .score-summary .total-max { font-size: 14px; opacity: 0.75; }
+  .score-summary .score-label { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+
+  .career-mini { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .career-item {
+    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    background: #f1f5f9; color: var(--muted); border: 1px solid var(--border);
+  }
+  .career-item strong { color: var(--text); }
+  .career-item.warn { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+
+  .meta-row {
+    background: var(--card); border-radius: var(--radius);
+    padding: 16px 24px; margin-bottom: 24px;
+    display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .meta-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .meta-item label { color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .meta-item input, .meta-item select {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; font-size: 14px; color: var(--text);
+    background: white; outline: none;
+  }
+  .meta-item input:focus, .meta-item select:focus { border-color: var(--primary-light); }
+
+  .section {
+    background: var(--card); border-radius: var(--radius);
+    padding: 24px 28px; margin-bottom: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 16px; font-weight: 700; color: var(--text);
+  }
+  .section-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .section-score-badge {
+    font-size: 13px; font-weight: 600; color: var(--primary);
+    background: #dbeafe; padding: 4px 12px; border-radius: 20px;
+  }
+
+  .q-item { margin-bottom: 24px; }
+  .q-item:last-child { margin-bottom: 0; }
+  .q-label { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text); line-height: 1.5; }
+  .q-hint {
+    font-size: 12px; color: var(--muted); margin-bottom: 10px;
+    background: #f8fafc; border-left: 3px solid var(--accent);
+    padding: 6px 10px; border-radius: 0 6px 6px 0; line-height: 1.5;
+  }
+  .q-hint.warn-hint {
+    background: #fff7ed; border-left-color: #f97316; color: #92400e;
+  }
+  .score-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .score-btn {
+    flex: 1; min-width: 52px; padding: 10px 8px;
+    border: 2px solid var(--border); border-radius: 8px;
+    background: white; cursor: pointer; text-align: center;
+    transition: all 0.15s; font-size: 13px; font-weight: 600;
+    color: var(--muted); position: relative;
+  }
+  .score-btn:hover { border-color: var(--primary-light); color: var(--primary); transform: translateY(-1px); }
+  .score-btn .num { display: block; font-size: 18px; font-weight: 800; }
+  .score-btn .lbl { display: block; font-size: 10px; margin-top: 1px; }
+  .score-btn.selected-1 { border-color: #ef4444; background: var(--score-1); color: #b91c1c; }
+  .score-btn.selected-2 { border-color: #f97316; background: var(--score-2); color: #c2410c; }
+  .score-btn.selected-3 { border-color: #eab308; background: var(--score-3); color: #a16207; }
+  .score-btn.selected-4 { border-color: #22c55e; background: var(--score-4); color: #15803d; }
+  .score-btn.selected-5 { border-color: #3b82f6; background: var(--score-5); color: #1d4ed8; }
+  textarea.q-note {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; color: var(--text);
+    resize: vertical; min-height: 64px; font-family: inherit;
+    outline: none; transition: border 0.15s; background: #fafafa;
+  }
+  textarea.q-note:focus { border-color: var(--primary-light); background: white; }
+  textarea.q-note::placeholder { color: #94a3b8; }
+
+  .eval-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .eval-grid { grid-template-columns: 1fr; } }
+  .eval-field label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+  .eval-field textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; font-family: inherit;
+    resize: vertical; min-height: 80px; outline: none;
+    transition: border 0.15s; background: #fafafa;
+  }
+  .eval-field textarea:focus { border-color: var(--primary-light); background: white; }
+  .result-select-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .result-btn {
+    flex: 1; min-width: 120px; padding: 14px;
+    border: 2px solid var(--border); border-radius: 10px;
+    background: white; cursor: pointer; text-align: center;
+    font-size: 14px; font-weight: 700; transition: all 0.15s;
+  }
+  .result-btn:hover { transform: translateY(-2px); }
+  .result-btn.pass { border-color: #22c55e; background: #dcfce7; color: #15803d; }
+  .result-btn.hold { border-color: #eab308; background: #fef9c3; color: #a16207; }
+  .result-btn.fail { border-color: #ef4444; background: #fee2e2; color: #b91c1c; }
+  .result-btn.active-pass { border-color: #16a34a; background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22,163,74,0.4); }
+  .result-btn.active-hold { border-color: #ca8a04; background: #ca8a04; color: white; box-shadow: 0 4px 12px rgba(202,138,4,0.4); }
+  .result-btn.active-fail { border-color: #dc2626; background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220,38,38,0.4); }
+
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: #1e293b; color: white; padding: 12px 20px;
+    border-radius: 10px; font-size: 14px; font-weight: 500;
+    opacity: 0; transform: translateY(10px); transition: all 0.3s;
+    z-index: 9999; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media print {
+    body { background: white; }
+    .nav-bar, .header-actions, .btn { display: none !important; }
+    .section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+    textarea { border: 1px solid #ccc !important; background: white !important; }
+  }
+
+  .q-divider { border: none; border-top: 1px dashed var(--border); margin: 20px 0; }
+
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  .split-wrapper { flex: 1; display: flex; min-height: 0; overflow: hidden; }
+  .content-pane { flex: 1; overflow-y: auto; min-width: 0; }
+  .pdf-pane {
+    flex: 0 0 0; overflow: hidden;
+    transition: flex-basis 0.25s ease;
+    display: flex; flex-direction: column; background: #f8fafc;
+  }
+  .pdf-pane.open { flex-basis: 45%; border-left: 2px solid var(--border); }
+  .pdf-toolbar {
+    padding: 10px 16px; background: #1e293b; color: white;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0; gap: 12px;
+  }
+  .pdf-toolbar-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pdf-close-btn {
+    background: rgba(255,255,255,0.12); border: none; color: white;
+    padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .pdf-close-btn:hover { background: rgba(255,255,255,0.25); }
+  #pdfFrame { flex: 1; width: 100%; border: none; }
+  @media print { .pdf-pane { display: none !important; } .content-pane { overflow: visible; } }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <span class="nav-label">후보자</span>
+  <a href="index.html" class="nav-link">김남경</a>
+  <a href="김영우.html" class="nav-link">김영우</a>
+  <a href="홍원의.html" class="nav-link">홍원의</a>
+  <a href="원미리.html" class="nav-link">원미리</a>
+  <a href="김승현.html" class="nav-link active">김승현</a>
+  <a href="연도흠.html" class="nav-link">연도흠</a>
+</div>
+
+<div class="header">
+  <div>
+    <h1>면접 채점표</h1>
+    <div class="subtitle">재무회계 직군 · 인터뷰 평가 기록 시스템</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-pdf" id="pdfToggleBtn" onclick="togglePdf()">📄 이력서 보기</button>
+    <button class="btn btn-ghost" onclick="loadData()">💾 불러오기</button>
+    <button class="btn btn-ghost" onclick="saveData()">✅ 저장</button>
+    <button class="btn btn-white" onclick="window.print()">🖨️ 인쇄</button>
+    <button class="btn btn-danger" onclick="resetAll()">초기화</button>
+  </div>
+</div>
+
+<div class="split-wrapper">
+<div class="content-pane">
+<div class="container">
+
+  <!-- 지원자 정보 -->
+  <div class="candidate-card">
+    <div class="avatar">김</div>
+    <div class="cand-info">
+      <h2>김승현</h2>
+      <div class="cand-meta">
+        <span class="tag tag-blue">재무회계 · 경력 17년 3개월</span>
+        <span class="tag tag-green">현) 조아제약 재무회계팀 차장</span>
+        <span class="tag tag-purple">세무법인 4년 · 세무조사 2회 · 금감원 심사 2회</span>
+        <span class="tag tag-orange">내부회계관리제도 구축 경험</span>
+        <span class="tag tag-red">직전 7,000만원 → 희망 7,900만원</span>
+      </div>
+      <div class="career-mini">
+        <div class="career-item"><strong>조아제약</strong> 차장 2026.04~현재</div>
+        <div class="career-item warn"><strong>애니이츠월드</strong> 팀장 2025.12~2026.03 (4개월) 경영악화</div>
+        <div class="career-item"><strong>앱클론</strong> 팀장 2023.11~2025.09 (22개월)</div>
+        <div class="career-item warn"><strong>넥스트온</strong> 팀장 2022.11~2023.10 (12개월) 임금체불</div>
+        <div class="career-item warn"><strong>인바이오젠</strong> 팀장 2021.01~2022.11 (22개월) 횡령/경영악화</div>
+        <div class="career-item warn"><strong>에이디칩스</strong> 차장 2019.04~2020.12 (21개월) 경영악화</div>
+        <div class="career-item"><strong>파인테크닉스</strong> 과장 2016.11~2019.04 (29개월)</div>
+        <div class="career-item warn"><strong>로고스바이오</strong> 대리 2015.01~2016.10 (22개월) 근무조건</div>
+        <div class="career-item"><strong>세무법인 다솔</strong> 주임 2009.08~2013.08 (4년)</div>
+      </div>
+    </div>
+    <div class="score-summary">
+      <div class="total-score" id="totalScore">0</div>
+      <div class="total-max">/ <span id="totalMax">0</span>점</div>
+      <div class="score-label">총점</div>
+    </div>
+  </div>
+
+  <!-- 면접 기본 정보 -->
+  <div class="meta-row">
+    <div class="meta-item">
+      <label>면접일시</label>
+      <input type="datetime-local" id="interviewDate">
+    </div>
+    <div class="meta-item">
+      <label>면접관</label>
+      <input type="text" id="interviewer" placeholder="이름" style="width:100px">
+    </div>
+    <div class="meta-item">
+      <label>지원 직급</label>
+      <input type="text" id="applyPos" placeholder="예) 차장 / 과장" style="width:120px">
+    </div>
+    <div class="meta-item">
+      <label>면접 방식</label>
+      <select id="interviewType">
+        <option>대면</option>
+        <option>화상</option>
+        <option>전화</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ① 재무·회계 전문성 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#dbeafe">📊</div>
+        <span>① 재무·회계 전문성</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 25점)</span>
+      </div>
+      <div class="section-score-badge" id="sec1-badge">0 / 25점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">1-1. 세무법인 4년 기반 세무 역량 — 법인결산·세무조정 직접 수행 범위 및 현재 활용도</div>
+      <div class="q-hint">세무법인 다솔 4년(법인·개인결산, 부가세, 급여신고, 거래처 관리). 이후 회사에서 외부 세무사 없이 세무조정을 직접 수행하는지 여부. 세무회계 2급·전산세무 2급·전산회계 1급 자격 활용도. 법인결산 조정 수행 수준(단순 신고 vs 직접 세무조정명세서 작성).</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_1" placeholder="면접관 메모 — 세무조정 직접 수행 여부, 외부 세무사 의존도, 구체적 세무 이슈 대응 사례"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-2. K-IFRS vs K-GAAP 결산 경험 — 두 기준 전환 시 주요 차이점 및 난이도</div>
+      <div class="q-hint">K-IFRS(조아제약·앱클론·에이디칩스·인바이오젠)와 K-GAAP(넥스트온·애니이츠월드) 모두 경험. 두 기준의 실무적 차이(리스, 수익인식, 금융상품 등). 앱클론에서 용역완료 시점 매출인식 및 개별원가법 적용 구체 경험. 주석 작성 수준.</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_2" placeholder="면접관 메모 — K-IFRS 적용 시 어려웠던 기준, 기준 전환 경험, 주석 작성 수준"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-3. 내부회계관리제도 구축 경험 — 인바이오젠·에이디칩스에서의 구체적 역할</div>
+      <div class="q-hint">인바이오젠(K-IFRS, 구축 및 설계평가운영)과 에이디칩스(K-IFRS, 검토 및 진행)에서 내부회계 경험. RCM(위험통제매트릭스) 작성, 업무기술서, 운영평가·설계평가 어느 단계를 담당했는지. 회계법인(감사인)과의 협업 방식. 로고스바이오시스템스 IPO 내부회계 경험도 확인.</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_3" placeholder="면접관 메모 — 설계/운영 평가 수행 범위, 통제 항목 수, 감사인 협업 방식"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-4. 원가관리 역량 — 제조업·용역업종별 원가계산 방식 및 재고수불 관리</div>
+      <div class="q-hint">조아제약(건강기능식품·의약품 제조), 파인테크닉스(LED·휴대폰케이스 제조), 앱클론(항체용역), 넥스트온(스마트팜 농산물). 각 업종별 원가계산 방식(개별원가법, 표준원가 등). 제조원가 vs 용역원가 처리 차이. 재고수불 불일치 이슈 발생 시 해결 방법.</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_4')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_4')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_4')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_4')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_4')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_4" placeholder="면접관 메모 — 업종별 원가 방식, 직접 수행 범위, 재고수불 이슈 해결 사례"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-5. 자금 운용 경험 — 앱클론 투자자금 100억 운용 방식 및 외화 관리</div>
+      <div class="q-hint">앱클론에서 DLS·전단채·예금·공사채 등 약 100억 투자자금 운용. 상품 선정 기준, 투자상품 개시 품의 프로세스, 분기별 수익 보고 방식. 외화 수금·지급 관리(환 손실 최소화). 차입금 관리(실행·연장·상환 등 금융사 대응).</div>
+      <div class="score-row" data-section="1">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_5')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_5')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_5')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_5')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_5')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_5" placeholder="면접관 메모 — 투자상품 선정 기준, 100억 운용 실적, 외화 리스크 관리 방법"></textarea>
+    </div>
+  </div>
+
+  <!-- ② 경력 검증 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#dcfce7">📋</div>
+        <span>② 경력 검증</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 20점)</span>
+      </div>
+      <div class="section-score-badge" id="sec2-badge">0 / 20점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">2-1. 현재 조아제약 차장 역할 — 팀 구성, 반기결산 진행 현황, 핵심 기여</div>
+      <div class="q-hint">2026.04 입사, 매출 600억 규모 제조업(건강기능식품·의약품). 재무회계팀 차장으로 K-IFRS 결산 담당. 반기 회계감사 대응(1회 완료). 팀 인원 구성. 조아제약 IPO 관련 여부 확인. 현 재직 중 이직 지원 시점 이유.</div>
+      <div class="score-row" data-section="2">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_1" placeholder="면접관 메모 — 팀 규모, 반기 결산 완료 여부, 재직 중 이직 사유"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">2-2. 경영악화·임금체불 이직 패턴 — 반복 원인 및 입사 전 회사 리스크 평가 방법</div>
+      <div class="q-hint class="warn-hint">⚠️ 핵심 검증. 2019년 이후 6개 회사 중 5개 퇴직사유가 경영악화(에이디칩스·넥스트온·인바이오젠·애니이츠월드 + 임금체불). 재무팀장으로서 입사 전 회사 재무상태를 어떻게 평가했는지. 경영악화 징후를 미리 파악했는지. 넥스트온 임금체불 구체 경위. 앞으로의 리스크 평가 기준.</div>
+      <div class="score-row" data-section="2">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_2')"><span class="num">1</span><span class="lbl">납득 안됨</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_2')"><span class="num">2</span><span class="lbl">다소 의심</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_2')"><span class="num">4</span><span class="lbl">납득</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_2')"><span class="num">5</span><span class="lbl">충분히 납득</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_2" placeholder="면접관 메모 — 이직 사유 일관성, 입사 전 실사 수준, 레드플래그 여부"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">2-3. 앱클론 22개월 — 가장 최근 팀장 경험, 바이오 재무 특성 및 투자자금 운용</div>
+      <div class="q-hint">앱클론(항체용역·연구개발, 매출 30억). 용역완료 시점 매출인식 적용, 개별원가법 월별 손익보고. 투자자금 100억 운용(DLS·전단채 등). 투자기관 요청자료 대응. 퇴직사유 "자금조달 어려움"의 구체 상황(자금 조달 실패 시점, 사전 인지 여부).</div>
+      <div class="score-row" data-section="2">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_3" placeholder="면접관 메모 — 용역매출 인식 방식, 투자자금 운용 실적, 퇴직 시점 상황"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">2-4. 파인테크닉스 2년 5개월 — 대규모 제조업(매출 2,200억) 결산 경험과 퇴직 사유</div>
+      <div class="q-hint">가장 규모가 큰 회사(매출 2,200억, 300명). LED 조명·휴대폰케이스 제조. K-IFRS 연결산 3회, 반기감사 2회, 기말감사 3회. 퇴직사유 "근무조건"의 구체 내용. 대규모 제조업 결산 경험이 이후 소규모 회사 팀장 역할에 미친 영향.</div>
+      <div class="score-row" data-section="2">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_4')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_4')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_4')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_4')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_4')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_4" placeholder="면접관 메모 — 대규모 결산 수행 범위, 근무조건 퇴직 이유 구체 내용"></textarea>
+    </div>
+  </div>
+
+  <!-- ③ 리더십·관리 역량 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#f3e8ff">👥</div>
+        <span>③ 리더십·관리 역량</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 15점)</span>
+      </div>
+      <div class="section-score-badge" id="sec3-badge">0 / 15점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">3-1. 팀장 리더십 — 여러 회사 팀장 경험, 팀 운영 방식 및 팀원 육성</div>
+      <div class="q-hint">앱클론·넥스트온·인바이오젠·에이디칩스·애니이츠월드에서 팀장 역할. 팀 인원 규모(소규모 스타트업 다수). 업무 배분 기준, 팀원 교육 방식. 어려웠던 팀 관리 상황(임금체불 등 경영위기 상황에서의 팀 운영). 1인 팀인지 복수 팀원 관리인지 확인.</div>
+      <div class="score-row" data-section="3">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q3_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q3_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q3_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q3_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q3_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q3_1" placeholder="면접관 메모 — 팀 규모, 실질 팀장 역할 여부, 위기 상황 팀 관리 사례"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">3-2. 경영진 보고 커뮤니케이션 — 월 손익 보고 방식 및 비재무진 설명 능력</div>
+      <div class="q-hint">여러 회사에서 월차 손익 분석 및 보고. 보고 상대(대표·CFO), 보고서 구성(단순 집계 vs 원인 분석). 분기별 경영계획 자료 작성(앱클론: 추정 손익계산서, 추정자금수지표). 비재무진에게 재무 이슈를 전달하는 방식. 자금수지 보고 주기 및 방법.</div>
+      <div class="score-row" data-section="3">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q3_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q3_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q3_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q3_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q3_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q3_2" placeholder="면접관 메모 — 보고서 형식·수준, 경영진 설득 사례, 경영계획 작성 경험"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">3-3. 투자기관 대응 경험 — 앱클론·넥스트온·인바이오젠 VC/투자사 요청자료 수준</div>
+      <div class="q-hint">스타트업·바이오 특성상 VC·투자기관 요청자료 대응 다수. 구체적으로 어떤 자료(재무실사·DD·투자 보고용 재무제표)를 작성했는지. 주총 관련 서류 준비 경험. 투자기관과의 직접 커뮤니케이션 여부.</div>
+      <div class="score-row" data-section="3">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q3_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q3_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q3_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q3_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q3_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q3_3" placeholder="면접관 메모 — 작성 자료 종류, 투자기관과의 직접 소통 수준"></textarea>
+    </div>
+  </div>
+
+  <!-- ④ 문제해결·위기대응 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#fef9c3">⚡</div>
+        <span>④ 문제해결·위기대응 능력</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 15점)</span>
+      </div>
+      <div class="section-score-badge" id="sec4-badge">0 / 15점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">4-1. 세무조사 2회 대응 — 대상 회사, 조사 종류, 주요 쟁점, 결과</div>
+      <div class="q-hint">핵심역량에 세무조사 2회 명시. 어느 회사에서 진행됐는지(바바라앤코 자기소개서에 언급). 조사 종류(법인세·부가세·통합조사). 주요 쟁점 항목 및 추징 결과. 세무사와 협업 vs 직접 대응. 세무법인 출신인 만큼 세무조사 대응 역량 구체 확인.</div>
+      <div class="score-row" data-section="4">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q4_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q4_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q4_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q4_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q4_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q4_1" placeholder="면접관 메모 — 대상 회사, 조사 유형, 쟁점 항목, 추징 결과, 본인 역할"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">4-2. 금융감독원 심사 대응 2회 — 어느 회사, 심사 종류, 대응 방법 및 결과</div>
+      <div class="q-hint">핵심역량에 금감원 심사 대응 2회 명시. 회계심사·감리 중 어떤 유형인지. 지적사항 내용 및 소명 자료 준비 방식. 결과(무혐의·경고·조치 여부). 실무 담당 vs 지원 역할. 에이디칩스 또는 앱클론 등 코스닥/비상장사에서의 금감원 심사 경로.</div>
+      <div class="score-row" data-section="4">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q4_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q4_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q4_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q4_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q4_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q4_2" placeholder="면접관 메모 — 심사 유형, 회사명, 지적 내용, 대응 과정, 최종 결과"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">4-3. 경영위기 상황 대처 — 임금체불(넥스트온), 횡령(인바이오젠) 당시 재무팀장으로서 역할</div>
+      <div class="q-hint">넥스트온 퇴직사유 "임금체불 및 자금조달 어려움", 인바이오젠 "횡령 및 자금조달 어려움". 재무팀장으로 이런 상황을 어느 시점에 파악했는지. 인바이오젠 횡령 발생 시 재무팀의 역할(발견·신고·대응). 위기 상황에서 팀원 보호 및 업무 지속 방법.</div>
+      <div class="score-row" data-section="4">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q4_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q4_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q4_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q4_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q4_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q4_3" placeholder="면접관 메모 — 횡령 발견 경위, 임금체불 대응 방식, 위기 인지 시점"></textarea>
+    </div>
+  </div>
+
+  <!-- ⑤ 지원동기·조직적합성 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#ffedd5">🎯</div>
+        <span>⑤ 지원동기·조직적합성</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 15점)</span>
+      </div>
+      <div class="section-score-badge" id="sec5-badge">0 / 15점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">5-1. 당사 지원 동기 — 조아제약 재직 중 이직 결정 이유 및 당사에 대한 이해도</div>
+      <div class="q-hint">2026.04 조아제약 입사 후 6개월 만에 이직 지원. 재직 중 이직 결정 이유. 당사에 대한 사전 조사 수준. 조아제약(건강기능식품·의약품 제조) 대비 당사에서 기대하는 점. 경영악화 경험 후 안정적인 회사를 선호하는지 확인.</div>
+      <div class="score-row" data-section="5">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q5_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q5_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q5_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q5_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q5_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q5_1" placeholder="면접관 메모 — 조아제약 이직 사유, 당사 조사 수준, 지원 동기 구체성"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">5-2. 이직 패턴 개선 의지 — 경영악화 반복 방지 및 장기 근속 가능성</div>
+      <div class="q-hint">2019~2026년 7년간 6번 이직(평균 약 1.2년). 대부분 경영악화로 퇴직. 이 패턴에 대한 본인의 인식. 당사 입사 전 당사의 재무 안정성을 어떻게 평가했는지. 3~5년 장기 근속 의지 및 근거.</div>
+      <div class="score-row" data-section="5">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q5_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q5_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q5_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q5_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q5_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q5_2" placeholder="면접관 메모 — 패턴에 대한 본인 인식, 당사 안정성 평가 여부, 장기 근속 의지"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">5-3. 커리어 목표 — 세무·재무회계 전문가로서의 5년 비전</div>
+      <div class="q-hint">세무법인 출신의 세무 강점 + 내부회계관리제도 + 원가관리 종합 역량. CFO 지향인지, 재무실무 전문가로 남을 것인지. 당사에서 추가로 발전시키고 싶은 역량(공시, IR, 연결 등). 소규모 스타트업 팀장 경험을 대형 안정 회사에서 어떻게 활용할지.</div>
+      <div class="score-row" data-section="5">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q5_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q5_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q5_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q5_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q5_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q5_3" placeholder="면접관 메모 — 목표의 구체성, 당사와의 방향성 일치 여부"></textarea>
+    </div>
+  </div>
+
+  <!-- ⑥ 처우협의·인성·태도 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#fee2e2">🤝</div>
+        <span>⑥ 처우협의·인성·태도</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 10점)</span>
+      </div>
+      <div class="section-score-badge" id="sec6-badge">0 / 10점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">6-1. 연봉 협의 — 직전 7,000만원 → 희망 7,900만원 (900만원 / 약 13% 인상 요구)</div>
+      <div class="q-hint">이력서에 직전연봉 7,000만원, 희망연봉 7,900만원 명시. 조아제약(현재 재직) 연봉 수준도 확인. 900만원 인상 근거(팀장 → 차장급 등 직급 반영 여부). 경영악화 이직 반복 패턴 고려 시 협의 태도. 하한선 확인.</div>
+      <div class="score-row" data-section="6">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q6_1')"><span class="num">1</span><span class="lbl">불가</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q6_1')"><span class="num">2</span><span class="lbl">어려움</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q6_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q6_1')"><span class="num">4</span><span class="lbl">원활</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q6_1')"><span class="num">5</span><span class="lbl">매우 원활</span></button>
+      </div>
+      <textarea class="q-note" id="note_q6_1" placeholder="협의 내용 메모 — 현 연봉, 희망 근거, 협의 하한선, 협상 반응"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">6-2. 전반적 태도·인상 — 면접 내 커뮤니케이션, 경청, 논리성</div>
+      <div class="q-hint">답변의 논리성, 간결성, 자신감, 경청 여부, 비언어적 신호(표정·자세 등) 종합 평가.</div>
+      <div class="score-row" data-section="6">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q6_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q6_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q6_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q6_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q6_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q6_2" placeholder="면접관 메모"></textarea>
+    </div>
+  </div>
+
+  <!-- 종합 평가 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#e0e7ff">📝</div>
+        <span>종합 평가</span>
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600">최종 합격 여부</p>
+    <div class="result-select-row">
+      <button class="result-btn pass" id="btn-pass" onclick="setResult('pass')">✅ 합격 (다음 단계 추천)</button>
+      <button class="result-btn hold" id="btn-hold" onclick="setResult('hold')">⏸ 보류 (추가 검토)</button>
+      <button class="result-btn fail" id="btn-fail" onclick="setResult('fail')">❌ 불합격</button>
+    </div>
+
+    <div class="eval-grid" style="margin-top:16px">
+      <div class="eval-field">
+        <label>강점 / 인상적인 점</label>
+        <textarea id="strength" placeholder="예) 세무법인 4년 기반 세무 실력, K-IFRS/K-GAAP 이중 결산 경험, 내부회계관리제도 구축 실적..."></textarea>
+      </div>
+      <div class="eval-field">
+        <label>우려사항 / 보완 필요 점</label>
+        <textarea id="weakness" placeholder="예) 2019~2026년 경영악화 이직 반복(6곳), 인바이오젠 횡령 관련 상황, 희망연봉 7,900만원..."></textarea>
+      </div>
+      <div class="eval-field">
+        <label>추가 확인 사항 (2차 면접 또는 레퍼런스)</label>
+        <textarea id="followup" placeholder="예) 앱클론·인바이오젠 레퍼런스 체크, 넥스트온 임금체불 경위, 금감원 심사 2회 구체 회사/결과..."></textarea>
+      </div>
+      <div class="eval-field">
+        <label>면접관 종합 소견</label>
+        <textarea id="overall" placeholder="전반적인 평가 의견을 자유롭게 작성해주세요."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+<div class="pdf-pane" id="pdfPane">
+  <div class="pdf-toolbar">
+    <span class="pdf-toolbar-title">📄 이력서 — 김승현</span>
+    <button class="pdf-close-btn" onclick="togglePdf()">✕ 닫기</button>
+  </div>
+  <iframe id="pdfFrame" src=""></iframe>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const scores = {};
+  const sectionMap = {
+    q1_1:'sec1', q1_2:'sec1', q1_3:'sec1', q1_4:'sec1', q1_5:'sec1',
+    q2_1:'sec2', q2_2:'sec2', q2_3:'sec2', q2_4:'sec2',
+    q3_1:'sec3', q3_2:'sec3', q3_3:'sec3',
+    q4_1:'sec4', q4_2:'sec4', q4_3:'sec4',
+    q5_1:'sec5', q5_2:'sec5', q5_3:'sec5',
+    q6_1:'sec6', q6_2:'sec6',
+  };
+  const sectionMax = { sec1:25, sec2:20, sec3:15, sec4:15, sec5:15, sec6:10 };
+  let currentResult = '';
+
+  function setScore(btn, key) {
+    const val = parseInt(btn.dataset.val);
+    scores[key] = val;
+    const row = btn.parentElement;
+    row.querySelectorAll('.score-btn').forEach(b => { b.className = 'score-btn'; });
+    btn.classList.add('selected-' + val);
+    updateScores();
+  }
+
+  function updateScores() {
+    const secTotals = { sec1:0, sec2:0, sec3:0, sec4:0, sec5:0, sec6:0 };
+    Object.entries(scores).forEach(([k, v]) => {
+      const sec = sectionMap[k];
+      if (sec) secTotals[sec] = (secTotals[sec] || 0) + v;
+    });
+    Object.entries(sectionMax).forEach(([sec, max]) => {
+      const badge = document.getElementById(sec + '-badge');
+      if (badge) badge.textContent = (secTotals[sec] || 0) + ' / ' + max + '점';
+    });
+    const total = Object.values(scores).reduce((a,b)=>a+b, 0);
+    const max = Object.keys(sectionMap).length * 5;
+    document.getElementById('totalScore').textContent = total;
+    document.getElementById('totalMax').textContent = max;
+  }
+
+  function setResult(r) {
+    currentResult = r;
+    ['pass','hold','fail'].forEach(type => {
+      document.getElementById('btn-' + type).className = 'result-btn ' + type;
+    });
+    document.getElementById('btn-' + r).classList.add('active-' + r);
+  }
+
+  function saveData() {
+    const data = {
+      scores: { ...scores },
+      notes: {},
+      meta: {
+        interviewDate: document.getElementById('interviewDate').value,
+        interviewer: document.getElementById('interviewer').value,
+        applyPos: document.getElementById('applyPos').value,
+        interviewType: document.getElementById('interviewType').value,
+      },
+      result: currentResult,
+      eval: {
+        strength: document.getElementById('strength').value,
+        weakness: document.getElementById('weakness').value,
+        followup: document.getElementById('followup').value,
+        overall: document.getElementById('overall').value,
+      }
+    };
+    document.querySelectorAll('.q-note').forEach(el => { data.notes[el.id] = el.value; });
+    localStorage.setItem('interview_kimsh', JSON.stringify(data));
+    showToast('✅ 저장되었습니다.');
+  }
+
+  function loadData() {
+    const raw = localStorage.getItem('interview_kimsh');
+    if (!raw) { showToast('저장된 데이터가 없습니다.'); return; }
+    const data = JSON.parse(raw);
+    Object.entries(data.scores || {}).forEach(([k, v]) => {
+      scores[k] = v;
+      const noteEl = document.getElementById('note_' + k);
+      if (!noteEl) return;
+      const qItem = noteEl.closest('.q-item');
+      if (!qItem) return;
+      const btn = qItem.querySelector(`.score-btn[data-val="${v}"]`);
+      if (btn) {
+        qItem.querySelectorAll('.score-btn').forEach(b => b.className = 'score-btn');
+        btn.classList.add('selected-' + v);
+      }
+    });
+    Object.entries(data.notes || {}).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+    if (data.meta) {
+      Object.entries(data.meta).forEach(([k, v]) => {
+        const el = document.getElementById(k);
+        if (el) el.value = v;
+      });
+    }
+    if (data.result) setResult(data.result);
+    if (data.eval) {
+      Object.entries(data.eval).forEach(([k, v]) => {
+        const el = document.getElementById(k);
+        if (el) el.value = v;
+      });
+    }
+    updateScores();
+    showToast('📂 불러오기 완료!');
+  }
+
+  function resetAll() {
+    if (!confirm('모든 입력 내용을 초기화하시겠습니까?')) return;
+    Object.keys(scores).forEach(k => delete scores[k]);
+    document.querySelectorAll('.score-btn').forEach(b => b.className = 'score-btn');
+    document.querySelectorAll('.q-note, #strength, #weakness, #followup, #overall').forEach(el => el.value = '');
+    ['interviewDate','interviewer','applyPos'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    currentResult = '';
+    ['pass','hold','fail'].forEach(type => {
+      document.getElementById('btn-' + type).className = 'result-btn ' + type;
+    });
+    updateScores();
+    showToast('🔄 초기화 완료');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function togglePdf() {
+    const pane = document.getElementById('pdfPane');
+    const frame = document.getElementById('pdfFrame');
+    const btn = document.getElementById('pdfToggleBtn');
+    if (pane.classList.contains('open')) {
+      pane.classList.remove('open');
+      frame.src = '';
+      if (btn) btn.textContent = '📄 이력서 보기';
+    } else {
+      pane.classList.add('open');
+      frame.src = '이력서_김승현.pdf';
+      if (btn) btn.textContent = '✕ 이력서 닫기';
+    }
+  }
+
+  setInterval(saveData, 30000);
+  updateScores();
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('interviewDate').value =
+    now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) +
+    'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+</script>
+</body>
+</html>
