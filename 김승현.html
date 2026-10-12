@@ -949,7 +949,7 @@
     const btn = document.getElementById('pdfToggleBtn');
     if (pane.classList.contains('open')) {
       pane.classList.remove('open');
-      document.getElementById('pdfFrame').src = '';
+      document.getElementById('pdfFrame').src = 'about:blank';
       if (btn) btn.textContent = '📄 이력서 보기';
     } else {
       if (sessionStorage.getItem(PDF_AUTH_KEY) === '1') {
