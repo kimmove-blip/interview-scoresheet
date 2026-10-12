@@ -280,6 +280,53 @@
   .pdf-close-btn:hover { background: rgba(255,255,255,0.25); }
   #pdfFrame { flex: 1; width: 100%; border: none; }
   @media print { .pdf-pane { display: none !important; } .content-pane { overflow: visible; } }
+
+  /* ── PDF AUTH MODAL ── */
+  .pdf-auth-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  .pdf-auth-overlay.show { display: flex; }
+  .pdf-auth-box {
+    background: white;
+    border-radius: 16px;
+    padding: 36px 40px;
+    width: 340px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    text-align: center;
+  }
+  .pdf-auth-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+  .pdf-auth-box p { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .pdf-auth-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  .pdf-auth-input:focus { border-color: var(--primary-light); }
+  .pdf-auth-input.error { border-color: var(--danger); animation: shake 0.3s; }
+  .pdf-auth-error { font-size: 12px; color: var(--danger); min-height: 16px; margin-bottom: 12px; }
+  .pdf-auth-btns { display: flex; gap: 8px; }
+  .pdf-auth-btns button { flex: 1; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+  .pdf-auth-confirm { background: var(--primary); color: white; }
+  .pdf-auth-confirm:hover { background: #1d4ed8; }
+  .pdf-auth-cancel { background: var(--border); color: var(--text); }
+  .pdf-auth-cancel:hover { background: #cbd5e1; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
 </style>
 </head>
 <body>
@@ -906,18 +953,56 @@
     setTimeout(() => t.classList.remove('show'), 2500);
   }
 
+  const PDF_AUTH_KEY = 'pdf_auth_ok';
+
   function togglePdf() {
     const pane = document.getElementById('pdfPane');
-    const frame = document.getElementById('pdfFrame');
     const btn = document.getElementById('pdfToggleBtn');
     if (pane.classList.contains('open')) {
       pane.classList.remove('open');
-      frame.src = '';
+      document.getElementById('pdfFrame').src = '';
       if (btn) btn.textContent = '📄 이력서 보기';
     } else {
-      pane.classList.add('open');
-      frame.src = '이력서_김영우.pdf';
-      if (btn) btn.textContent = '✕ 이력서 닫기';
+      if (sessionStorage.getItem(PDF_AUTH_KEY) === '1') {
+        openPdf();
+      } else {
+        showPdfAuth();
+      }
+    }
+  }
+
+  function openPdf() {
+    const pane = document.getElementById('pdfPane');
+    const btn = document.getElementById('pdfToggleBtn');
+    pane.classList.add('open');
+    document.getElementById('pdfFrame').src = '이력서_김영우.pdf';
+    if (btn) btn.textContent = '✕ 이력서 닫기';
+  }
+
+  function showPdfAuth() {
+    document.getElementById('pdfAuthOverlay').classList.add('show');
+    document.getElementById('pdfAuthInput').value = '';
+    document.getElementById('pdfAuthError').textContent = '';
+    setTimeout(() => document.getElementById('pdfAuthInput').focus(), 50);
+  }
+
+  function closePdfAuth() {
+    document.getElementById('pdfAuthOverlay').classList.remove('show');
+  }
+
+  function confirmPdfPassword() {
+    const input = document.getElementById('pdfAuthInput');
+    const err = document.getElementById('pdfAuthError');
+    if (input.value === 'vidente2025') {
+      sessionStorage.setItem(PDF_AUTH_KEY, '1');
+      closePdfAuth();
+      openPdf();
+    } else {
+      err.textContent = '비밀번호가 올바르지 않습니다.';
+      input.classList.add('error');
+      setTimeout(() => input.classList.remove('error'), 400);
+      input.value = '';
+      input.focus();
     }
   }
 
@@ -930,5 +1015,19 @@
     now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) +
     'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
 </script>
+
+<div class="pdf-auth-overlay" id="pdfAuthOverlay">
+  <div class="pdf-auth-box">
+    <h3>🔒 이력서 열람 인증</h3>
+    <p>이력서 열람은 권한이 필요합니다.<br>비밀번호를 입력해주세요.</p>
+    <input type="password" class="pdf-auth-input" id="pdfAuthInput"
+      placeholder="비밀번호" onkeydown="if(event.key==='Enter')confirmPdfPassword()">
+    <div class="pdf-auth-error" id="pdfAuthError"></div>
+    <div class="pdf-auth-btns">
+      <button class="pdf-auth-cancel" onclick="closePdfAuth()">취소</button>
+      <button class="pdf-auth-confirm" onclick="confirmPdfPassword()">확인</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
