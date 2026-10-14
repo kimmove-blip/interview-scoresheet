@@ -29,7 +29,6 @@
     font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
   }
 
   /* ── HEADER ── */
@@ -245,7 +244,8 @@
   .career-item.warn { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
 
   /* ── SPLIT VIEW ── */
-  html, body { height: 100%; }
+  html { height: 100%; }
+  body { height: 100vh; }
   body { display: flex; flex-direction: column; overflow: hidden; }
   .split-wrapper { flex: 1; display: flex; min-height: 0; overflow: hidden; }
   .content-pane { flex: 1; overflow-y: auto; min-width: 0; }
