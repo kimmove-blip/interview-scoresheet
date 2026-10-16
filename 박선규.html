@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>면접 채점표 — 박선규</title>
+<style>
+  :root {
+    --primary: #1e40af;
+    --primary-light: #3b82f6;
+    --accent: #0ea5e9;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --success: #16a34a;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --score-1: #fee2e2;
+    --score-2: #fed7aa;
+    --score-3: #fef9c3;
+    --score-4: #dcfce7;
+    --score-5: #dbeafe;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* ── NAV ── */
+  .nav-bar {
+    background: #0f172a;
+    padding: 10px 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .nav-label { font-size: 11px; color: #94a3b8; font-weight: 500; margin-right: 4px; }
+  .nav-link {
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    text-decoration: none; transition: all 0.15s;
+    background: rgba(255,255,255,0.08); color: #cbd5e1;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.18); color: white; }
+  .nav-link.active { background: #1e40af; color: white; }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    color: white;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(30,64,175,0.3);
+  }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+  .header-actions { display: flex; gap: 10px; }
+  .btn {
+    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .btn-ghost { background: rgba(255,255,255,0.15); color: white; }
+  .btn-ghost:hover { background: rgba(255,255,255,0.25); }
+  .btn-white { background: white; color: var(--primary); }
+  .btn-white:hover { background: #e0e7ff; }
+  .btn-danger { background: #dc2626; color: white; }
+  .btn-danger:hover { background: #b91c1c; }
+
+  /* ── CANDIDATE CARD ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+  .candidate-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: center;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .cand-info h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .cand-meta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  }
+  .tag-blue { background: #dbeafe; color: #1d4ed8; }
+  .tag-green { background: #dcfce7; color: #15803d; }
+  .tag-purple { background: #f3e8ff; color: #7e22ce; }
+  .tag-orange { background: #ffedd5; color: #c2410c; }
+  .tag-red { background: #fee2e2; color: #b91c1c; }
+  .score-summary {
+    text-align: center; min-width: 100px;
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    border-radius: 10px; padding: 14px 18px; color: white;
+  }
+  .score-summary .total-score { font-size: 36px; font-weight: 800; line-height: 1; }
+  .score-summary .total-max { font-size: 14px; opacity: 0.75; }
+  .score-summary .score-label { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+
+  /* ── INTERVIEW DATE ── */
+  .meta-row {
+    background: var(--card); border-radius: var(--radius);
+    padding: 16px 24px; margin-bottom: 24px;
+    display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .meta-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .meta-item label { color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .meta-item input, .meta-item select {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; font-size: 14px; color: var(--text);
+    background: white; outline: none;
+  }
+  .meta-item input:focus, .meta-item select:focus { border-color: var(--primary-light); }
+
+  /* ── SECTION ── */
+  .section {
+    background: var(--card); border-radius: var(--radius);
+    padding: 24px 28px; margin-bottom: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 16px; font-weight: 700; color: var(--text);
+  }
+  .section-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .section-score-badge {
+    font-size: 13px; font-weight: 600; color: var(--primary);
+    background: #dbeafe; padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* ── QUESTION ITEM ── */
+  .q-item { margin-bottom: 24px; }
+  .q-item:last-child { margin-bottom: 0; }
+  .q-label {
+    font-size: 14px; font-weight: 600; margin-bottom: 6px;
+    color: var(--text); line-height: 1.5;
+  }
+  .q-hint {
+    font-size: 12px; color: var(--muted); margin-bottom: 10px;
+    background: #f8fafc; border-left: 3px solid var(--accent);
+    padding: 6px 10px; border-radius: 0 6px 6px 0; line-height: 1.5;
+  }
+  .score-row {
+    display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .score-btn {
+    flex: 1; min-width: 52px; padding: 10px 8px;
+    border: 2px solid var(--border); border-radius: 8px;
+    background: white; cursor: pointer; text-align: center;
+    transition: all 0.15s; font-size: 13px; font-weight: 600;
+    color: var(--muted); position: relative;
+  }
+  .score-btn:hover { border-color: var(--primary-light); color: var(--primary); transform: translateY(-1px); }
+  .score-btn .num { display: block; font-size: 18px; font-weight: 800; }
+  .score-btn .lbl { display: block; font-size: 10px; margin-top: 1px; }
+  .score-btn.selected-1 { border-color: #ef4444; background: var(--score-1); color: #b91c1c; }
+  .score-btn.selected-2 { border-color: #f97316; background: var(--score-2); color: #c2410c; }
+  .score-btn.selected-3 { border-color: #eab308; background: var(--score-3); color: #a16207; }
+  .score-btn.selected-4 { border-color: #22c55e; background: var(--score-4); color: #15803d; }
+  .score-btn.selected-5 { border-color: #3b82f6; background: var(--score-5); color: #1d4ed8; }
+  textarea.q-note {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; color: var(--text);
+    resize: vertical; min-height: 64px; font-family: inherit;
+    outline: none; transition: border 0.15s; background: #fafafa;
+  }
+  textarea.q-note:focus { border-color: var(--primary-light); background: white; }
+  textarea.q-note::placeholder { color: #94a3b8; }
+
+  /* ── OVERALL EVAL ── */
+  .eval-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .eval-grid { grid-template-columns: 1fr; } }
+  .eval-field label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .eval-field textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; font-family: inherit;
+    resize: vertical; min-height: 80px; outline: none;
+    transition: border 0.15s; background: #fafafa;
+  }
+  .eval-field textarea:focus { border-color: var(--primary-light); background: white; }
+  .result-select-row {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .result-btn {
+    flex: 1; min-width: 120px; padding: 14px;
+    border: 2px solid var(--border); border-radius: 10px;
+    background: white; cursor: pointer; text-align: center;
+    font-size: 14px; font-weight: 700; transition: all 0.15s;
+  }
+  .result-btn:hover { transform: translateY(-2px); }
+  .result-btn.pass { border-color: #22c55e; background: #dcfce7; color: #15803d; }
+  .result-btn.hold { border-color: #eab308; background: #fef9c3; color: #a16207; }
+  .result-btn.fail { border-color: #ef4444; background: #fee2e2; color: #b91c1c; }
+  .result-btn.active-pass { border-color: #16a34a; background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22,163,74,0.4); }
+  .result-btn.active-hold { border-color: #ca8a04; background: #ca8a04; color: white; box-shadow: 0 4px 12px rgba(202,138,4,0.4); }
+  .result-btn.active-fail { border-color: #dc2626; background: #dc2626; color: white; box-shadow: 0 4px 12px rgba(220,38,38,0.4); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: #1e293b; color: white; padding: 12px 20px;
+    border-radius: 10px; font-size: 14px; font-weight: 500;
+    opacity: 0; transform: translateY(10px); transition: all 0.3s;
+    z-index: 9999; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── PRINT ── */
+  @media print {
+    html, body {
+      height: auto !important;
+      overflow: visible !important;
+      display: block !important;
+    }
+    .split-wrapper {
+      display: block !important;
+      overflow: visible !important;
+      height: auto !important;
+    }
+    .content-pane {
+      overflow: visible !important;
+      flex: none !important;
+      height: auto !important;
+    }
+    .nav-bar, .header-actions, .btn { display: none !important; }
+    .section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+    textarea { border: 1px solid #ccc !important; background: white !important; }
+    .pdf-pane { display: none !important; }
+  }
+
+  /* ── DIVIDER ── */
+  .q-divider { border: none; border-top: 1px dashed var(--border); margin: 20px 0; }
+
+  /* ── CAREER TIMELINE ── */
+  .career-mini { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; margin-bottom: 4px; }
+  .career-item {
+    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    background: #f1f5f9; color: var(--muted); border: 1px solid var(--border);
+  }
+  .career-item strong { color: var(--text); }
+  .career-item.warn { background: #fff7ed; border-color: #fed7aa; color: #92400e; }
+  .career-item.warn strong { color: #92400e; }
+
+  /* ── SPLIT VIEW ── */
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  .split-wrapper { flex: 1; display: flex; min-height: 0; overflow: hidden; }
+  .content-pane { flex: 1; overflow-y: auto; min-width: 0; }
+  .pdf-pane {
+    flex: 0 0 0; overflow: hidden;
+    transition: flex-basis 0.25s ease;
+    display: flex; flex-direction: column; background: #f8fafc;
+  }
+  .pdf-pane.open { flex-basis: 45%; border-left: 2px solid var(--border); }
+  .pdf-toolbar {
+    padding: 10px 16px; background: #0f172a; color: white;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0; gap: 12px;
+  }
+  .pdf-toolbar-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pdf-close-btn {
+    background: rgba(255,255,255,0.12); border: none; color: white;
+    padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .pdf-close-btn:hover { background: rgba(255,255,255,0.25); }
+  #pdfFrame { flex: 1; width: 100%; border: none; }
+
+  /* ── PDF AUTH MODAL ── */
+  .pdf-auth-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 9999;
+    align-items: center; justify-content: center;
+  }
+  .pdf-auth-overlay.show { display: flex; }
+  .pdf-auth-box {
+    background: white; border-radius: 16px; padding: 36px 40px;
+    width: 340px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;
+  }
+  .pdf-auth-box h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+  .pdf-auth-box p { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .pdf-auth-input {
+    width: 100%; padding: 10px 14px; border: 2px solid var(--border);
+    border-radius: 8px; font-size: 15px; outline: none;
+    margin-bottom: 8px; transition: border-color 0.15s; font-family: inherit;
+  }
+  .pdf-auth-input:focus { border-color: var(--primary-light); }
+  .pdf-auth-input.error { border-color: var(--danger); animation: shake 0.3s; }
+  .pdf-auth-error { font-size: 12px; color: var(--danger); min-height: 16px; margin-bottom: 12px; }
+  .pdf-auth-btns { display: flex; gap: 8px; }
+  .pdf-auth-btns button { flex: 1; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+  .pdf-auth-confirm { background: var(--primary); color: white; }
+  .pdf-auth-confirm:hover { background: #1d4ed8; }
+  .pdf-auth-cancel { background: var(--border); color: var(--text); }
+  .pdf-auth-cancel:hover { background: #cbd5e1; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- 후보자 탐색 네비게이션 -->
+<div class="nav-bar">
+  <span class="nav-label">후보자</span>
+  <a href="index.html" class="nav-link">김남경</a>
+  <a href="김영우.html" class="nav-link">김영우</a>
+  <a href="홍원의.html" class="nav-link">홍원의</a>
+  <a href="원미리.html" class="nav-link">원미리</a>
+  <a href="김승현.html" class="nav-link">김승현</a>
+  <a href="연도흠.html" class="nav-link">연도흠</a>
+  <a href="강솔기.html" class="nav-link">강솔기</a>
+  <a href="권민정.html" class="nav-link">권민정</a>
+  <a href="김초희.html" class="nav-link">김초희</a>
+  <a href="김동현.html" class="nav-link">김동현</a>
+  <a href="박선규.html" class="nav-link active">박선규</a>
+</div>
+
+<div class="header">
+  <div>
+    <h1>면접 채점표</h1>
+    <div class="subtitle">재무회계 직군 · 인터뷰 평가 기록 시스템</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-pdf" id="pdfToggleBtn" onclick="togglePdf()">📄 이력서 보기</button>
+    <button class="btn btn-ghost" onclick="loadData()">💾 불러오기</button>
+    <button class="btn btn-ghost" onclick="saveData()">✅ 저장</button>
+    <button class="btn btn-white" onclick="window.print()">🖨️ 인쇄</button>
+    <button class="btn btn-danger" onclick="resetAll()">초기화</button>
+  </div>
+</div>
+
+<div class="split-wrapper">
+<div class="content-pane">
+<div class="container">
+
+  <!-- 지원자 정보 -->
+  <div class="candidate-card">
+    <div class="avatar">선</div>
+    <div class="cand-info">
+      <h2>박선규</h2>
+      <div class="cand-meta">
+        <span class="tag tag-blue">재무회계 · 경력 2년 11개월</span>
+        <span class="tag tag-green">전) 팜스빌 매니저(재경팀) · 유모스원 팀원</span>
+        <span class="tag tag-purple">IFRS관리사 · 재경관리사 · 전산세무2급 · 전산회계1급</span>
+        <span class="tag tag-orange">현연봉 3,200만원 / 희망 내규에 따름</span>
+      </div>
+      <div class="career-mini">
+        <div class="career-item"><strong>팜스빌</strong> 매니저 2025.05~2026.01 (9개월) · 코스닥 상장사</div>
+        <div class="career-item"><strong>유모스원</strong> 팀원 2022.03~2024.04 (2년2개월) · 현대차 손자회사</div>
+        <div class="career-item warn"><strong>공백</strong> 2024.04~2025.05 (1년1개월) · 자격증 취득</div>
+        <div class="career-item warn"><strong>공백</strong> 2020.02~2022.03 (2년1개월) · 졸업 후 자격증 취득</div>
+      </div>
+    </div>
+    <div class="score-summary">
+      <div class="total-score" id="totalScore">0</div>
+      <div class="total-max">/ <span id="totalMax">0</span>점</div>
+      <div class="score-label">총점</div>
+    </div>
+  </div>
+
+  <!-- 면접 기본 정보 -->
+  <div class="meta-row">
+    <div class="meta-item">
+      <label>면접일시</label>
+      <input type="datetime-local" id="interviewDate">
+    </div>
+    <div class="meta-item">
+      <label>면접관</label>
+      <input type="text" id="interviewer" placeholder="이름" style="width:100px">
+    </div>
+    <div class="meta-item">
+      <label>지원 직급</label>
+      <input type="text" id="applyPos" placeholder="예) 팀원 / 주임" style="width:120px">
+    </div>
+    <div class="meta-item">
+      <label>면접 방식</label>
+      <select id="interviewType">
+        <option>대면</option>
+        <option>화상</option>
+        <option>전화</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ① 재무·회계 전문성 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#dbeafe">📊</div>
+        <span>① 재무·회계 전문성</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 25점)</span>
+      </div>
+      <div class="section-score-badge" id="sec1-badge">0 / 25점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">1-1. K-IFRS 적용 실무 경험 — 주석 검토 및 외부감사 대응 범위</div>
+      <div class="q-hint">팜스빌에서 분기/반기/기말 별도·연결 재무제표 주석 검토와 외부감사 대응을 하셨는데, 구체적으로 어떤 주석 항목을 검토하셨고 감사인에게 어떤 자료를 제공하셨나요? 이나우스아카데미에서 K-IFRS 주석작성실무 교육도 받으셨는데, 실무에 어떻게 연결이 됐는지도 말씀해 주세요.</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_1" placeholder="면접관 메모 — 답변 내용, 구체성, 신뢰도 등"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-2. 결산 업무 직접 수행 범위 — '지원'과 '직접 처리'의 경계</div>
+      <div class="q-hint">이력서에 두 곳 모두 결산 '지원'이라고 표현되어 있는데, 실제로 어느 범위까지 직접 처리하셨나요? 전표 입력부터 재무제표 작성까지 어느 단계까지 본인이 담당하셨는지 구체적으로 설명해 주세요. 팜스빌과 유모스원 각각에서 차이가 있었다면 그 부분도 말씀해 주세요.</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_2" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-3. 부가세·원천세 신고 직접 수행 범위 및 오류 대응 경험</div>
+      <div class="q-hint">유모스원과 팜스빌 모두에서 부가세 신고를 하셨는데, 신고 과정에서 오류나 수정신고가 필요했던 경험이 있으신가요? 세무사와는 어떻게 협업하셨나요? 이나우스아카데미에서 원가계산 및 분석실무(IFRS반영) 교육도 받으셨는데 실무에 활용하신 적이 있으신지도 궁금합니다.</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_3" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-4. 더존 ERP 활용 수준 — Smart A·iCUBE 실무 활용 범위</div>
+      <div class="q-hint">더존 Smart A(유모스원)와 iCUBE(팜스빌)를 모두 사용하신 것으로 보이는데, 두 시스템의 차이를 실무에서 어떻게 느끼셨나요? 자체기장을 하신다고 하셨는데, ERP에서 어떤 모듈을 주로 활용하셨고 가장 능숙하게 다루는 기능은 무엇인지 말씀해 주시겠어요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_4')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_4')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_4')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_4')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_4')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_4" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">1-5. 코스닥 상장사 회계 특수성 — 본사·자회사 연결 회계처리 경험 (팜스빌)</div>
+      <div class="q-hint">팜스빌이 코스닥 상장사로 K-IFRS기준 본사 및 자회사 전사 회계처리를 하셨다고 되어 있는데, 연결조정 작업을 직접 수행하셨나요? 공시 일정(분기보고서·반기보고서·사업보고서)에 맞춰 자료를 준비하면서 어려웠던 점이 있으셨다면 말씀해 주세요.</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q1_5')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q1_5')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q1_5')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q1_5')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q1_5')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q1_5" placeholder="면접관 메모"></textarea>
+    </div>
+  </div>
+
+  <!-- ② 경력 검증 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#dcfce7">📋</div>
+        <span>② 경력 검증</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 20점)</span>
+      </div>
+      <div class="section-score-badge" id="sec2-badge">0 / 20점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">2-1. 팜스빌 (2025.05~2026.01, 9개월) — 단기 재직 사유 및 실제 업무 범위</div>
+      <div class="q-hint">팜스빌에서 9개월 재직 후 퇴사하셨는데, 이직하게 된 구체적인 사유가 무엇인가요? 그리고 매니저 직함이지만 팀 구성이 어떻게 됐는지, 본인이 단독으로 처리한 업무와 지원·보조 업무의 비율이 어떻게 됐는지도 말씀해 주시겠어요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_1" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">2-2. 유모스원 (2022.03~2024.04, 2년 2개월) — 현대차 계열사 경험 및 퇴사 사유</div>
+      <div class="q-hint">유모스원이 현대자동차 손자회사(포티투닷 계열사)로 대기업 계열 특성상 일반 중소기업과 어떤 점이 달랐나요? 회사의 대부분의 비용에 대한 지출결의서 작성까지 담당하셨는데, 2년 2개월 후 이직하신 이유가 무엇이었나요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_2" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">2-3. 졸업(2020.02) 후 첫 직장 입사(2022.03)까지 약 2년 1개월 공백</div>
+      <div class="q-hint">대학 졸업 후 약 2년간의 공백이 있는데, 그 기간에 어떻게 지내셨나요? 전산세무2급(2020.12), 전산회계1급(2020.10), ERP 자격증(2020.11) 등을 이 시기에 집중적으로 취득하신 것으로 보이는데, 처음 회계 직무로 취업하는 데 어려움이 있으셨다면 어떤 부분이 가장 어려우셨나요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_3" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">2-4. 유모스원 퇴사(2024.04) 후 팜스빌 입사(2025.05)까지 약 1년 1개월 공백</div>
+      <div class="q-hint">유모스원 퇴사 후 팜스빌 입사까지 약 1년 1개월의 공백이 있는데, 이 기간에는 어떻게 지내셨나요? IFRS관리사(2024.11), 재경관리사(2023.11), 나무경영아카데미 K-IFRS 결산전문가 양성과정(2024.11~12) 등을 이 시기에 하신 건가요? 그 기간 동안 재취업이 어려웠던 이유가 있으신가요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q2_4')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q2_4')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q2_4')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q2_4')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q2_4')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q2_4" placeholder="면접관 메모"></textarea>
+    </div>
+  </div>
+
+  <!-- ③ 성장 잠재력·자기계발 역량 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#f3e8ff">🌱</div>
+        <span>③ 성장 잠재력·자기계발 역량</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 15점)</span>
+      </div>
+      <div class="section-score-badge" id="sec3-badge">0 / 15점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">3-1. 자격증 취득 동기 및 실무 연결 — 자기계발 방향성</div>
+      <div class="q-hint">IFRS관리사, 재경관리사, 전산세무2급, 전산회계1급, ERP 자격증 등 다수의 자격증을 취득하셨는데, 이 자격증들이 실무에 어떻게 도움이 됐나요? 특히 IFRS관리사는 2024년에 취득하셨는데, 어떤 계기로 도전하셨나요? 앞으로 추가로 개발하고 싶은 역량이 있으신가요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q3_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q3_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q3_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q3_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q3_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q3_1" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">3-2. 업무 개선 경험 — 매출 확정 보고 파일 통합 사례 구체화</div>
+      <div class="q-hint">자소서에서 두 개로 나뉘어 있던 파일을 하나로 통합하고, 매입매출장·계정별 원장·기간별 손익계산서를 함께 첨부하도록 재구성하셨다고 하셨는데, 이 개선을 제안하고 실행하는 과정에서 어려움은 없었나요? 팀 내 반응이나 실제 효과는 어땠나요? 비덴트에서도 유사한 개선을 시도해보실 의향이 있으신가요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q3_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q3_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q3_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q3_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q3_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q3_2" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">3-3. 엑셀 활용 능력 — VBA·피벗테이블 실무 적용 사례</div>
+      <div class="q-hint">패스트캠퍼스에서 엑셀 VBA 자동화까지 이수하셨는데, 실무에서 VBA나 피벗테이블을 활용해서 업무를 자동화하거나 효율화한 경험이 있으신가요? 구체적으로 어떤 업무에 적용하셨고, 도입 전후로 얼마나 시간이 단축됐나요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q3_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q3_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q3_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q3_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q3_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q3_3" placeholder="면접관 메모"></textarea>
+    </div>
+  </div>
+
+  <!-- ④ 문제해결·업무개선 능력 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#fef9c3">⚡</div>
+        <span>④ 문제해결·업무개선 능력</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 15점)</span>
+      </div>
+      <div class="section-score-badge" id="sec4-badge">0 / 15점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">4-1. 외부감사 대응 — 감사인 요청 대응 및 돌발 이슈 처리 경험</div>
+      <div class="q-hint">팜스빌에서 외부감사 대응을 하셨는데, 감사인이 요청한 자료 중에서 준비하기 어려웠거나 처음 접하는 요청이 있었나요? 그런 상황에서 어떻게 대응하셨는지 구체적인 에피소드를 상황(S)·과제(T)·행동(A)·결과(R) 순서로 말씀해 주시겠어요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q4_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q4_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q4_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q4_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q4_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q4_1" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">4-2. 팀 내 소통·협업 방식 — 집중형 업무 스타일과 대인관계 균형</div>
+      <div class="q-hint">자소서에 집중력이 강점이지만 '한자리에 오래 앉아 집중'하는 스타일이라고 하셨고, 신체적 활동성이 부족하다고 솔직하게 쓰셨는데, 협업이나 유관부서 소통이 필요한 상황에서 어떻게 균형을 맞추시나요? 실제로 소통 문제로 어려움을 겪었던 사례가 있었다면 어떻게 해결하셨나요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q4_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q4_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q4_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q4_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q4_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q4_2" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">4-3. 업무 우선순위 관리 — 마감이 겹칠 때 대응 방식</div>
+      <div class="q-hint">팜스빌처럼 월/분기/반기/기말 결산이 모두 겹치는 상황에서, 업무 우선순위를 어떻게 정하셨나요? 실제로 마감이 겹쳐서 어려웠던 상황이 있었다면 어떻게 처리하셨는지 구체적으로 말씀해 주시겠어요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q4_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q4_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q4_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q4_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q4_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q4_3" placeholder="면접관 메모"></textarea>
+    </div>
+  </div>
+
+  <!-- ⑤ 지원동기·조직적합성 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#ffedd5">🎯</div>
+        <span>⑤ 지원동기·조직적합성</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 15점)</span>
+      </div>
+      <div class="section-score-badge" id="sec5-badge">0 / 15점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">5-1. 비덴트 지원 동기 — 당사 사업·직무에 대한 이해도</div>
+      <div class="q-hint">비덴트에 지원하신 구체적인 이유가 무엇인가요? 팜스빌(건강기능식품 제조)과 유모스원(차량용단말기 제조)에서 제조업 경험이 있으신데, 비덴트의 사업과 제품에 대해 어떻게 조사하셨나요? 비덴트에서 기여하고 싶은 부분이 있다면 구체적으로 말씀해 주시겠어요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q5_1')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q5_1')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q5_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q5_1')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q5_1')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q5_1" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">5-2. 장기 근속 의향 — 이직 패턴과 안정성</div>
+      <div class="q-hint">졸업 후 유모스원(2년 2개월), 팜스빌(9개월)을 거치셨는데, 비덴트에서는 얼마나 오래 근무하실 계획인가요? 특히 팜스빌이 9개월로 짧은 편인데, 짧게 마무리된 이유와 비덴트에서는 다를 것이라는 점을 어떻게 설득해 주실 수 있을까요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q5_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q5_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q5_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q5_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q5_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q5_2" placeholder="면접관 메모"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">5-3. 재무회계 전문가로서 5년 후 목표 — 커리어 비전</div>
+      <div class="q-hint">경력 약 3년으로 아직 초반인데, 재무회계 분야에서 어떤 전문성을 키우고 싶으신가요? 자격증을 열심히 취득하시는 것으로 보아 특정 방향이 있으실 것 같은데, 비덴트에서 5년 뒤에는 어떤 모습이 되고 싶으신지 구체적으로 말씀해 주시겠어요?</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q5_3')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q5_3')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q5_3')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q5_3')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q5_3')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q5_3" placeholder="면접관 메모"></textarea>
+    </div>
+  </div>
+
+  <!-- ⑥ 처우협의·인성·태도 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#fee2e2">🤝</div>
+        <span>⑥ 처우협의·인성·태도</span>
+        <span style="font-size:12px;color:var(--muted);font-weight:400">(배점 10점)</span>
+      </div>
+      <div class="section-score-badge" id="sec6-badge">0 / 10점</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-label">6-1. 연봉 협의 — 현연봉 3,200만원, 희망 내규에 따름</div>
+      <div class="q-hint">현재 연봉이 3,200만원이시고 희망은 회사 내규에 따른다고 하셨는데, 저희 쪽에서 제시해 드릴 수 있는 조건에 대해 말씀드리겠습니다. 솔직하게 기대 수준을 말씀해 주시면 좋겠습니다. 입사 가능 시기도 함께 확인해 주세요.</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q6_1')"><span class="num">1</span><span class="lbl">불가</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q6_1')"><span class="num">2</span><span class="lbl">어려움</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q6_1')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q6_1')"><span class="num">4</span><span class="lbl">원활</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q6_1')"><span class="num">5</span><span class="lbl">매우 원활</span></button>
+      </div>
+      <textarea class="q-note" id="note_q6_1" placeholder="협의 내용 메모 (제시 연봉, 반응, 입사 가능 시기 등)"></textarea>
+    </div>
+
+    <hr class="q-divider">
+
+    <div class="q-item">
+      <div class="q-label">6-2. 전반적 태도·인상 — 면접 내 커뮤니케이션, 경청, 표현력</div>
+      <div class="q-hint">답변의 논리성, 간결성, 자신감, 경청 여부, 비언어적 신호(표정·자세 등) 종합 평가.</div>
+      <div class="score-row">
+        <button class="score-btn" data-val="1" onclick="setScore(this,'q6_2')"><span class="num">1</span><span class="lbl">매우 미흡</span></button>
+        <button class="score-btn" data-val="2" onclick="setScore(this,'q6_2')"><span class="num">2</span><span class="lbl">미흡</span></button>
+        <button class="score-btn" data-val="3" onclick="setScore(this,'q6_2')"><span class="num">3</span><span class="lbl">보통</span></button>
+        <button class="score-btn" data-val="4" onclick="setScore(this,'q6_2')"><span class="num">4</span><span class="lbl">우수</span></button>
+        <button class="score-btn" data-val="5" onclick="setScore(this,'q6_2')"><span class="num">5</span><span class="lbl">탁월</span></button>
+      </div>
+      <textarea class="q-note" id="note_q6_2" placeholder="면접관 메모"></textarea>
+    </div>
+  </div>
+
+  <!-- 종합 평가 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">
+        <div class="section-icon" style="background:#e0e7ff">📝</div>
+        <span>종합 평가</span>
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600">최종 합격 여부</p>
+    <div class="result-select-row">
+      <button class="result-btn pass" id="btn-pass" onclick="setResult('pass')">✅ 합격 (다음 단계 추천)</button>
+      <button class="result-btn hold" id="btn-hold" onclick="setResult('hold')">⏸ 보류 (추가 검토)</button>
+      <button class="result-btn fail" id="btn-fail" onclick="setResult('fail')">❌ 불합격</button>
+    </div>
+
+    <div class="eval-grid" style="margin-top:16px">
+      <div class="eval-field">
+        <label>강점 / 인상적인 점</label>
+        <textarea id="strength" placeholder="예) 다수 자격증 보유로 이론 기반 탄탄, 코스닥 상장사 외부감사 경험, 업무 개선 의지..."></textarea>
+      </div>
+      <div class="eval-field">
+        <label>우려사항 / 보완 필요 점</label>
+        <textarea id="weakness" placeholder="예) 경력 2년 11개월로 짧은 편, 공백기간 2회, 팜스빌 9개월 단기 재직, 실무 독립 수행 범위 불명확..."></textarea>
+      </div>
+      <div class="eval-field">
+        <label>추가 확인 사항 (2차 면접 시)</label>
+        <textarea id="followup" placeholder="예) 공백 기간 상세 경위, 팜스빌 단기 퇴사 사유 재확인, 비덴트 업종 이해도..."></textarea>
+      </div>
+      <div class="eval-field">
+        <label>면접관 종합 소견</label>
+        <textarea id="overall" placeholder="전반적인 평가 의견을 자유롭게 작성해주세요."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /content-pane -->
+<div class="pdf-pane" id="pdfPane">
+  <div class="pdf-toolbar">
+    <span class="pdf-toolbar-title">📄 이력서 — 박선규</span>
+    <button class="pdf-close-btn" onclick="togglePdf()">✕ 닫기</button>
+  </div>
+  <iframe id="pdfFrame" src=""></iframe>
+</div>
+</div><!-- /split-wrapper -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const scores = {};
+  const sectionMap = {
+    q1_1:'sec1', q1_2:'sec1', q1_3:'sec1', q1_4:'sec1', q1_5:'sec1',
+    q2_1:'sec2', q2_2:'sec2', q2_3:'sec2', q2_4:'sec2',
+    q3_1:'sec3', q3_2:'sec3', q3_3:'sec3',
+    q4_1:'sec4', q4_2:'sec4', q4_3:'sec4',
+    q5_1:'sec5', q5_2:'sec5', q5_3:'sec5',
+    q6_1:'sec6', q6_2:'sec6',
+  };
+  const sectionMax = { sec1:25, sec2:20, sec3:15, sec4:15, sec5:15, sec6:10 };
+  let currentResult = '';
+
+  function setScore(btn, key) {
+    const val = parseInt(btn.dataset.val);
+    scores[key] = val;
+    const row = btn.parentElement;
+    row.querySelectorAll('.score-btn').forEach(b => { b.className = 'score-btn'; });
+    btn.classList.add('selected-' + val);
+    updateScores();
+  }
+
+  function updateScores() {
+    const secTotals = { sec1:0, sec2:0, sec3:0, sec4:0, sec5:0, sec6:0 };
+    Object.entries(scores).forEach(([k, v]) => {
+      const sec = sectionMap[k];
+      if (sec) secTotals[sec] = (secTotals[sec] || 0) + v;
+    });
+    Object.entries(sectionMax).forEach(([sec, max]) => {
+      const badge = document.getElementById(sec + '-badge');
+      if (badge) badge.textContent = (secTotals[sec] || 0) + ' / ' + max + '점';
+    });
+    const total = Object.values(scores).reduce((a,b)=>a+b, 0);
+    const max = Object.keys(sectionMap).length * 5;
+    document.getElementById('totalScore').textContent = total;
+    document.getElementById('totalMax').textContent = max;
+  }
+
+  function setResult(r) {
+    currentResult = r;
+    ['pass','hold','fail'].forEach(type => {
+      document.getElementById('btn-' + type).className = 'result-btn ' + type;
+    });
+    document.getElementById('btn-' + r).classList.add('active-' + r);
+  }
+
+  function saveData() {
+    const data = {
+      scores: { ...scores },
+      notes: {},
+      meta: {
+        interviewDate: document.getElementById('interviewDate').value,
+        interviewer: document.getElementById('interviewer').value,
+        applyPos: document.getElementById('applyPos').value,
+        interviewType: document.getElementById('interviewType').value,
+      },
+      result: currentResult,
+      eval: {
+        strength: document.getElementById('strength').value,
+        weakness: document.getElementById('weakness').value,
+        followup: document.getElementById('followup').value,
+        overall: document.getElementById('overall').value,
+      }
+    };
+    document.querySelectorAll('.q-note').forEach(el => { data.notes[el.id] = el.value; });
+    localStorage.setItem('interview_parksq', JSON.stringify(data));
+    showToast('✅ 저장되었습니다.');
+  }
+
+  function loadData() {
+    const raw = localStorage.getItem('interview_parksq');
+    if (!raw) { showToast('저장된 데이터가 없습니다.'); return; }
+    const data = JSON.parse(raw);
+    Object.entries(data.scores || {}).forEach(([k, v]) => {
+      scores[k] = v;
+      const noteEl = document.getElementById('note_' + k);
+      if (!noteEl) return;
+      const qItem = noteEl.closest('.q-item');
+      if (!qItem) return;
+      const btn = qItem.querySelector(`.score-btn[data-val="${v}"]`);
+      if (btn) {
+        qItem.querySelectorAll('.score-btn').forEach(b => b.className = 'score-btn');
+        btn.classList.add('selected-' + v);
+      }
+    });
+    Object.entries(data.notes || {}).forEach(([id, val]) => {
+      const el = document.getElementById(id); if (el) el.value = val;
+    });
+    if (data.meta) {
+      Object.entries(data.meta).forEach(([k, v]) => {
+        const el = document.getElementById(k); if (el) el.value = v;
+      });
+    }
+    if (data.result) setResult(data.result);
+    if (data.eval) {
+      Object.entries(data.eval).forEach(([k, v]) => {
+        const el = document.getElementById(k); if (el) el.value = v;
+      });
+    }
+    updateScores();
+    showToast('📂 불러오기 완료!');
+  }
+
+  function resetAll() {
+    if (!confirm('모든 입력 내용을 초기화하시겠습니까?')) return;
+    Object.keys(scores).forEach(k => delete scores[k]);
+    document.querySelectorAll('.score-btn').forEach(b => b.className = 'score-btn');
+    document.querySelectorAll('.q-note, #strength, #weakness, #followup, #overall').forEach(el => el.value = '');
+    ['interviewDate','interviewer','applyPos'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    currentResult = '';
+    ['pass','hold','fail'].forEach(type => {
+      document.getElementById('btn-' + type).className = 'result-btn ' + type;
+    });
+    updateScores();
+    showToast('🔄 초기화 완료');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  const PDF_AUTH_KEY = 'pdf_auth_ok';
+
+  function togglePdf() {
+    const pane = document.getElementById('pdfPane');
+    const btn = document.getElementById('pdfToggleBtn');
+    if (pane.classList.contains('open')) {
+      pane.classList.remove('open');
+      document.getElementById('pdfFrame').src = 'about:blank';
+      if (btn) btn.textContent = '📄 이력서 보기';
+    } else {
+      if (sessionStorage.getItem(PDF_AUTH_KEY) === '1') {
+        openPdf();
+      } else {
+        showPdfAuth();
+      }
+    }
+  }
+
+  function openPdf() {
+    const pane = document.getElementById('pdfPane');
+    const btn = document.getElementById('pdfToggleBtn');
+    pane.classList.add('open');
+    document.getElementById('pdfFrame').src = '10.16(금)_오후2시_박선규.pdf';
+    if (btn) btn.textContent = '✕ 이력서 닫기';
+  }
+
+  function showPdfAuth() {
+    document.getElementById('pdfAuthOverlay').classList.add('show');
+    document.getElementById('pdfAuthInput').value = '';
+    document.getElementById('pdfAuthError').textContent = '';
+    setTimeout(() => document.getElementById('pdfAuthInput').focus(), 50);
+  }
+
+  function closePdfAuth() {
+    document.getElementById('pdfAuthOverlay').classList.remove('show');
+  }
+
+  function confirmPdfPassword() {
+    const input = document.getElementById('pdfAuthInput');
+    const err = document.getElementById('pdfAuthError');
+    if (input.value === 'vidente2025') {
+      sessionStorage.setItem(PDF_AUTH_KEY, '1');
+      closePdfAuth();
+      openPdf();
+    } else {
+      err.textContent = '비밀번호가 올바르지 않습니다.';
+      input.classList.add('error');
+      setTimeout(() => input.classList.remove('error'), 400);
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  updateScores();
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('interviewDate').value =
+    now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) +
+    'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+</script>
+
+<div class="pdf-auth-overlay" id="pdfAuthOverlay">
+  <div class="pdf-auth-box">
+    <h3>🔒 이력서 열람 인증</h3>
+    <p>이력서 열람은 권한이 필요합니다.<br>비밀번호를 입력해주세요.</p>
+    <input type="password" class="pdf-auth-input" id="pdfAuthInput"
+      placeholder="비밀번호" onkeydown="if(event.key==='Enter')confirmPdfPassword()">
+    <div class="pdf-auth-error" id="pdfAuthError"></div>
+    <div class="pdf-auth-btns">
+      <button class="pdf-auth-cancel" onclick="closePdfAuth()">취소</button>
+      <button class="pdf-auth-confirm" onclick="confirmPdfPassword()">확인</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

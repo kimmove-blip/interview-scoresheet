@@ -225,10 +225,25 @@
 
   /* ── PRINT ── */
   @media print {
-    body { background: white; }
-    .header-actions, .btn { display: none !important; }
+    html, body {
+      height: auto !important;
+      overflow: visible !important;
+      display: block !important;
+    }
+    .split-wrapper {
+      display: block !important;
+      overflow: visible !important;
+      height: auto !important;
+    }
+    .content-pane {
+      overflow: visible !important;
+      flex: none !important;
+      height: auto !important;
+    }
+    .nav-bar, .header-actions, .btn { display: none !important; }
     .section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
     textarea { border: 1px solid #ccc !important; background: white !important; }
+    .pdf-pane { display: none !important; }
   }
 
   /* ── DIVIDER ── */
@@ -269,7 +284,6 @@
   }
   .pdf-close-btn:hover { background: rgba(255,255,255,0.25); }
   #pdfFrame { flex: 1; width: 100%; border: none; }
-  @media print { .pdf-pane { display: none !important; } .content-pane { overflow: visible; } }
 </style>
 </head>
 <body>
@@ -287,6 +301,7 @@
   <a href="권민정.html" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;background:#1e40af;color:white;">권민정</a>
   <a href="김초희.html" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.08);color:#cbd5e1;">김초희</a>
   <a href="김동현.html" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.08);color:#cbd5e1;">김동현</a>
+  <a href="박선규.html" style="padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.08);color:#cbd5e1;">박선규</a>
 </div>
 
 <div class="header">
